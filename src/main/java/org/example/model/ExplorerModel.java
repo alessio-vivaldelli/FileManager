@@ -1,16 +1,11 @@
 package org.example.model;
 
+import org.example.MItem;
 import org.example.ShortcutItem;
 
 import javax.swing.*;
 import javax.swing.event.SwingPropertyChangeSupport;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
-import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.*;
@@ -20,6 +15,7 @@ public class ExplorerModel implements Model {
 
     final public static String NEW_SHORTCUT = "new_shortcut";
     final public static String TREE_INIT = "tree_initialized";
+    final public static String NEW_ITEM = "new_folder_item";
 
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
@@ -59,7 +55,7 @@ public class ExplorerModel implements Model {
         propertyChangeSupport.firePropertyChange(ExplorerModel.NEW_SHORTCUT, null, item);
     }
 
-    public void showCurrentDirectory(File root){
+    public void showCurrentDirectory(File dir){
 
     }
 
@@ -84,20 +80,18 @@ public class ExplorerModel implements Model {
                 File[] fileList = file.listFiles();
                 if (fileList != null) {
                     for (int i = 0; i < fileList.length; i++) {
+//                        System.out.println("working..");
 //                        final DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(fileList[i]);
                         final DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(new File(fileList[i].getPath()){
                             @Override
                             public String toString() {
-                                if(getName().equals("")){
-                                    return "Giorgio";
-                                }
                                 return getName();
                             }
                         });
 
-                        if(fileList[i].isDirectory()){
+                        int ind = fileList[i].getPath().lastIndexOf('.');
+                        if(ind <= 0){
                             publish(tempNode);
-//						final String newFileName = fileName + "\\" + fileList[i].getName();
                             String newFileName = fileList[i].getPath();
                             fillTree(tempNode, newFileName);
                         }
@@ -115,10 +109,13 @@ public class ExplorerModel implements Model {
 
             @Override
             protected void done() {
-//				tree.setEnabled(true);
             }
         };
         worker.execute();
+    }
+
+    public void addItem(MItem item){
+        propertyChangeSupport.firePropertyChange(ExplorerModel.NEW_ITEM, null, item);
     }
 
     @Override
@@ -138,5 +135,29 @@ public class ExplorerModel implements Model {
         propertyChangeSupport.removePropertyChangeListener(name, listener);
     }
 
+    /**
+     * Compare item based on their name. Folder has higher priority
+     * than file, as well as special folder (witch starts with a dot)
+     */
+    public static class CompareItems implements Comparator<File> {
+        @Override
+        public int compare(File o1, File o2) {
 
+            int ind1 = o1.getPath().lastIndexOf('.');
+            int ind2 = o2.getPath().lastIndexOf('.');
+            if(o1.getName().startsWith(".")){return -1;}
+            if(o2.getName().startsWith(".")){return 1;}
+
+            if (ind1 > 0 && ind2 > 0) {
+                return o1.getName().compareTo(o2.getName());
+            } else if (ind1 <= 0 && ind2 <= 0) {
+                return o1.getName().compareTo(o2.getName());
+            }else if(ind1 > 0 && ind2 <= 0){
+                return 1;
+            } else if (ind2 > 0 && ind1 <= 0) {
+                return -1;
+            }
+            return 0;
+        }
+    }
 }

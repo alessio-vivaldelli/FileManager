@@ -1,5 +1,8 @@
 package org.example.controller;
 
+import org.example.MItem;
+import org.example.model.ItemModel;
+import org.example.view.Item;
 import org.example.ShortcutItem;
 import org.example.model.ExplorerModel;
 import org.example.view.ExplorerView;
@@ -8,12 +11,12 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+
 import com.formdev.flatlaf.extras.*;
 
 
@@ -23,6 +26,8 @@ public class ExplorerController {
     ExplorerModel model;
     JTabbedPane leftShortcut;
     JTree tree;
+    private boolean isFocused = true;
+    private JFrame frame;
 
 
     public ExplorerController(ExplorerView view, ExplorerModel model){
@@ -65,6 +70,7 @@ public class ExplorerController {
 
         model.addPropertyChangeListener(ExplorerModel.NEW_SHORTCUT, this::newShortcutTab);
         model.addPropertyChangeListener(ExplorerModel.TREE_INIT, this::treeInitialized);
+        model.addPropertyChangeListener(ExplorerModel.NEW_ITEM, this::newItem);
 
         tree = view.getTree();
         DefaultMutableTreeNode root = model.createTree(new File("This Computer"));
@@ -76,6 +82,34 @@ public class ExplorerController {
         ((DefaultTreeModel) tree.getModel()).setRoot(root);
 
         tree.addTreeSelectionListener(this::treeSelectionChange);
+
+
+        new SwingWorker<Void, Void>() {
+            JFrame topFrame;
+            @Override
+            protected Void doInBackground() throws Exception {
+
+                do {
+                    topFrame = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, view.innerPanel);
+                } while (topFrame == null);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                setFrame(topFrame);
+            }
+        }.execute();
+
+
+    }
+
+    private void setFrame(JFrame frame) {
+        this.frame  = frame;
+    }
+
+    private void newItem(PropertyChangeEvent e){
+        showFolder((File) e.getNewValue());
     }
 
     private void newShortcutTab(PropertyChangeEvent e){
@@ -91,6 +125,47 @@ public class ExplorerController {
     }
 
     private void treeSelectionChange(TreeSelectionEvent e){
-
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) ((JTree) e.getSource()).getLastSelectedPathComponent();
+        File f = (File) (node.getUserObject());
+        showFolder(f);
     }
+
+    private void showFolder(File f){
+        if(f == null){return;}
+        view.fileView_p.removeAll();
+        view.fileView_p.repaint();
+        view.fileView_p.revalidate();
+
+        SwingWorker<Void, MItem> worker = new SwingWorker<Void, MItem>() {
+            @Override
+            public Void doInBackground() {
+                for (File a : Arrays.stream(f.listFiles()).sorted(new ExplorerModel.CompareItems()).toList())
+                {
+                    if(a == null){continue;}
+                    MItem newItem = new MItem(a);
+                    addItemListener(newItem);
+                    publish(newItem);
+                }
+                return null;
+            }
+
+            @Override
+            protected void process(List<MItem> chunks) {
+                for(MItem a : chunks){
+                    view.addItem(a);
+                }
+            }
+
+            @Override
+            protected void done() {
+                return;
+            }
+        };
+        worker.execute();
+    }
+
+    private void addItemListener(MItem item){
+        item.getModel().addPropertyChangeListener(ItemModel.NEW_ITEM, this::newItem);
+    }
+
 }

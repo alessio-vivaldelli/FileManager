@@ -1,26 +1,17 @@
 package org.example.view;
 
 import net.miginfocom.swing.MigLayout;
-import org.example.Item;
-import org.example.Main;
+import org.example.Layout.MOverlayLayout;
+import org.example.MItem;
 import org.example.TabPage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.concurrent.Flow;
 
-import com.formdev.flatlaf.extras.*;
-import org.example.WrapLayout;
+import org.example.Layout.WrapLayout;
 
 
 public class ExplorerView extends TabPage {
@@ -33,6 +24,8 @@ public class ExplorerView extends TabPage {
     JTabbedPane shortcutTabs;
     JPanel panel;
     public JTree tree;
+    public JPanel fileView_p;
+    public JPanel innerPanel;
 
     public ExplorerView() {
         super("File Explorer " + count);
@@ -43,7 +36,12 @@ public class ExplorerView extends TabPage {
     private void initView() {
 
         panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        panel.setFocusable(true);
+        panel.setLayout(new MOverlayLayout(panel));
+
+        innerPanel = new JPanel();
+        innerPanel.setFocusable(true);
+        innerPanel.setLayout(new BorderLayout());
 
 
         // Left panel
@@ -75,24 +73,21 @@ public class ExplorerView extends TabPage {
         center.add(files, "grow");
 
 
-        panel.add(shortcutTabs, BorderLayout.WEST);
-        panel.add(center, BorderLayout.CENTER);
+        innerPanel.add(shortcutTabs, BorderLayout.WEST);
+        innerPanel.add(center, BorderLayout.CENTER);
 
-        JPanel fileView_p = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 10));
+        fileView_p = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 10));
 
-        fileView_p.add(new Item(new File("C:\\Users\\aless\\Documents")));
-        fileView_p.add(new Item(new File("C:\\Users\\aless\\Pictures")));
-        fileView_p.add(new Item(new File("C:\\Users\\aless\\Music")));
-        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Telegram Desktop\\photo_2024-08-22_14-29-16.jpg")));
-        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Iscrizione.pdf")));
-//        for (int i = 0; i < 15; i++) {
-//            JButton d = new JButton("Test" + i);
-//            int dim  = (int) (Main.screenDimension.width * 0.08);
-//            d.setPreferredSize(new Dimension(dim, dim));
-//            fileView_p.add(d);
-//        }
+        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Documents")));
+        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Pictures")));
+//        fileView_p.add(new Item(new File("C:\\Users\\aless\\Music")));
+//        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Telegram Desktop\\photo_2024-08-22_14-29-16.jpg")));
+//        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Iscrizione.pdf")));
+
+
 
         JScrollPane fileView = new JScrollPane(fileView_p);
+        fileView.getVerticalScrollBar().setUnitIncrement(20);
         fileView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         fileView.setBorder(new EmptyBorder(0, 0, 0, 0));
         fileView.setMinimumSize(new Dimension(400, 50));
@@ -114,17 +109,20 @@ public class ExplorerView extends TabPage {
 
         for (int i = 0; i < 5; i++) {
             JButton b = new JButton("Test");
+            b.setIcon((Icon) UIManager.get("FileView.directoryIcon"));
+            b.setHorizontalAlignment(JButton.LEFT);
             b.setFocusable(false);
             b.putClientProperty("JButton.buttonType", "borderless");
-
             shortcutBar.add(b, "growx,pad 0");
         }
+
         leftPanel.add(shortcutBar, "growx");
         leftPanel.add(sep,"growx,gaptop 20");
         leftPanel.add(treePane, "growx, growy, gaptop 20");
 
         JScrollPane leftScrollPanel = new JScrollPane(leftPanel);
         leftScrollPanel.setPreferredSize(new Dimension( 200, 50));
+
 
         splitPane = new JSplitPane();
         JPanel centerPanel = new JPanel(new BorderLayout());
@@ -136,6 +134,16 @@ public class ExplorerView extends TabPage {
 
         files.setLayout(new BorderLayout());
         files.add(centerPanel, BorderLayout.CENTER);
+
+        JButton searchText = new JButton("TESTTESTS");
+        searchText.setAlignmentX(Component.RIGHT_ALIGNMENT); searchText.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+        innerPanel.setAlignmentX(Component.LEFT_ALIGNMENT); innerPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+        panel.add(searchText);
+        panel.add(innerPanel);
+    }
+    public void addItem(MItem e){
+        fileView_p.add(e);
+        fileView_p.revalidate();
     }
 
 
@@ -157,30 +165,4 @@ public class ExplorerView extends TabPage {
         return tree;
     }
 
-
-    public class FileSystemTreeRenderer extends DefaultTreeCellRenderer {
-        private static final long serialVersionUID = 0;
-        private FileSystemView mView = FileSystemView.getFileSystemView();
-
-        public FileSystemTreeRenderer() {
-        }
-
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                      boolean selected, boolean expanded, boolean leaf, int row,
-                                                      boolean hasFocus) {
-            JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-            try {
-                File f = null;
-                if (value instanceof DefaultMutableTreeNode){f = (File) ((DefaultMutableTreeNode) value).getUserObject();}
-                else {f = new File((String) value);}
-                l.setText(f.toString());
-                l.setIcon(mView.getSystemIcon(f));
-//                System.out.println("Icon Set");
-            } catch (Exception e) {
-//                System.out.println(value);
-            }
-            return l;
-        }
-
-    }
 }

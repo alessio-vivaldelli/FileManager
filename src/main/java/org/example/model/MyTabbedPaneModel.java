@@ -1,5 +1,6 @@
 package org.example.model;
 
+import org.example.MExplorer;
 import org.example.TabPage;
 import org.example.controller.ExplorerController;
 import org.example.view.ExplorerView;
@@ -37,10 +38,10 @@ public class MyTabbedPaneModel implements Model {
         TabPage page = null;
         switch (Type){
             case TabPage.EXPLORER:
-                page = new ExplorerView();
-                ExplorerModel explorerModel = new ExplorerModel();
-                new ExplorerController((ExplorerView) page, explorerModel);
-
+//                page = new ExplorerView();
+//                ExplorerModel explorerModel = new ExplorerModel();
+//                new ExplorerController((ExplorerView) page, explorerModel);
+                page = new MExplorer();
                 break;
             case TabPage.OTHER:
                 page = new TabPage("Other");
