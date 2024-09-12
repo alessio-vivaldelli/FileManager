@@ -14,6 +14,7 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,11 +29,13 @@ public class ExplorerController {
     JTree tree;
     private boolean isFocused = true;
     private JFrame frame;
-
+    private List<MItem> itemList;
 
     public ExplorerController(ExplorerView view, ExplorerModel model){
         this.view = view;
         this.model = model;
+
+        itemList = new ArrayList<>();
 
         initController();
         model.initModel();
@@ -83,29 +86,77 @@ public class ExplorerController {
 
         tree.addTreeSelectionListener(this::treeSelectionChange);
 
-
-        new SwingWorker<Void, Void>() {
-            JFrame topFrame;
+        view.fileView_p.addMouseListener(new MouseListener() {
             @Override
-            protected Void doInBackground() throws Exception {
-
-                do {
-                    topFrame = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, view.innerPanel);
-                } while (topFrame == null);
-                return null;
+            public void mouseClicked(MouseEvent e) {
+                System.out.println("CNDUSAIFLH");
+                view.fileView_p.requestFocusInWindow();
             }
 
             @Override
-            protected void done() {
-                setFrame(topFrame);
-            }
-        }.execute();
+            public void mousePressed(MouseEvent e) {
 
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+        view.fileView_p.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                System.out.println("Focus IN");
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                System.out.println("Focus OUT");
+
+            }
+        });
+        view.fileView_p.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+                if((e.getKeyChar() < 'a' || e.getKeyChar() > 'z') &&
+                        (e.getKeyChar() < 'A' || e.getKeyChar() > 'Z') &&
+                        (e.getKeyChar() < '0' || e.getKeyChar() > '9')){
+                    return;
+                }
+
+                boolean res = filterItemsByText(view.searchText.getText().toLowerCase() + e.getKeyChar());
+                view.searchText.exist(res);
+                view.searchText.addChar(e.getKeyChar());
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
 
     }
 
-    private void setFrame(JFrame frame) {
-        this.frame  = frame;
+    private boolean filterItemsByText(String filterText){
+        List<MItem> res = itemList.stream().filter(item -> item.toString().toLowerCase().startsWith(filterText)).toList();
+        System.out.println(res);
+        return !res.isEmpty();
     }
 
     private void newItem(PropertyChangeEvent e){
@@ -136,6 +187,8 @@ public class ExplorerController {
         view.fileView_p.repaint();
         view.fileView_p.revalidate();
 
+        itemList = new ArrayList<>();
+
         SwingWorker<Void, MItem> worker = new SwingWorker<Void, MItem>() {
             @Override
             public Void doInBackground() {
@@ -153,6 +206,7 @@ public class ExplorerController {
             protected void process(List<MItem> chunks) {
                 for(MItem a : chunks){
                     view.addItem(a);
+                    itemList.add(a);
                 }
             }
 

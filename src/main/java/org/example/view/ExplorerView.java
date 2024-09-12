@@ -3,12 +3,17 @@ package org.example.view;
 import net.miginfocom.swing.MigLayout;
 import org.example.Layout.MOverlayLayout;
 import org.example.MItem;
+import org.example.SearchText;
 import org.example.TabPage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 
 import org.example.Layout.WrapLayout;
@@ -26,6 +31,7 @@ public class ExplorerView extends TabPage {
     public JTree tree;
     public JPanel fileView_p;
     public JPanel innerPanel;
+    public SearchText searchText;
 
     public ExplorerView() {
         super("File Explorer " + count);
@@ -77,9 +83,10 @@ public class ExplorerView extends TabPage {
         innerPanel.add(center, BorderLayout.CENTER);
 
         fileView_p = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 10));
+        fileView_p.setFocusable(true);
 
-        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Documents")));
-        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Pictures")));
+//        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Documents")));
+//        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Pictures")));
 //        fileView_p.add(new Item(new File("C:\\Users\\aless\\Music")));
 //        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Telegram Desktop\\photo_2024-08-22_14-29-16.jpg")));
 //        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Iscrizione.pdf")));
@@ -135,11 +142,24 @@ public class ExplorerView extends TabPage {
         files.setLayout(new BorderLayout());
         files.add(centerPanel, BorderLayout.CENTER);
 
-        JButton searchText = new JButton("TESTTESTS");
+//        JButton searchText = new JButton(""){
+//
+//            @Override
+//            public void setText(String text) {
+//                super.setText(text);
+//
+//            }
+//        };
+
+
+        searchText = new SearchText();
+
         searchText.setAlignmentX(Component.RIGHT_ALIGNMENT); searchText.setAlignmentY(Component.BOTTOM_ALIGNMENT);
         innerPanel.setAlignmentX(Component.LEFT_ALIGNMENT); innerPanel.setAlignmentY(Component.TOP_ALIGNMENT);
         panel.add(searchText);
         panel.add(innerPanel);
+
+
     }
     public void addItem(MItem e){
         fileView_p.add(e);

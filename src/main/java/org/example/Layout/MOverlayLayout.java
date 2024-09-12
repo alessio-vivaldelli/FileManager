@@ -50,6 +50,11 @@ public class MOverlayLayout extends OverlayLayout {
             int spanY = (i<=prefIndex) ? ySpans[i] : c.getPreferredSize().height;
             int x = (int) (in.left + (maxX * c.getAlignmentX()));
             int y = (int) (in.top + (maxY * c.getAlignmentY()));
+
+            if(c instanceof JLabel){
+                spanX = c.getPreferredSize().width;
+                spanY = c.getPreferredSize().height;
+            }
             if(c.getAlignmentX() == 1.0f){
                 x -= spanX;
             }if(c.getAlignmentY() == 1.0f){

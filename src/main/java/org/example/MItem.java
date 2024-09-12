@@ -31,4 +31,9 @@ public class MItem extends Item {
 //        this.model.newTag(tag);
         super.addNewTag(tag);
     }
+
+    @Override
+    public String toString() {
+        return file.getName();
+    }
 }
