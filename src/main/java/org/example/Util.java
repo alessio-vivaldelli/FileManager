@@ -13,6 +13,7 @@ public final class Util {
     private static List<File> shortcutFiles;
     private static List<File> favouriteFiles;
     private static Map<String, List<Integer>> filesTagMap;
+    private static Map<Integer, List<String>> tagIdPathMap;
     private static Map<String, Integer> tagsMap;
     private static Map<String, String> tagsColorMap;
     private static int maxTagID = 0;
@@ -64,6 +65,7 @@ public final class Util {
 
     private static void loadTagsData(ResultSet rs){
         filesTagMap = new HashMap<>();
+        tagIdPathMap = new HashMap<>();
 
         try {
             while (rs.next()){
@@ -75,10 +77,22 @@ public final class Util {
                     List<Integer> tmp = filesTagMap.get(FilePath);
                     tmp.add(TagID);
                     filesTagMap.put(FilePath, tmp);
-                }else {
+                }
+                else {
                     List<Integer> tmp = new ArrayList<>();
                     tmp.add(TagID);
                     filesTagMap.put(FilePath, tmp);
+                }
+
+                if(tagIdPathMap.containsKey(TagID)){
+                    List<String> tmp = tagIdPathMap.get(TagID);
+                    tmp.add(FilePath);
+                    tagIdPathMap.put(TagID, tmp);
+                }
+                else {
+                    List<String> tmp = new ArrayList<>();
+                    tmp.add(FilePath);
+                    tagIdPathMap.put(TagID, tmp);
                 }
             }
         }catch (Exception e){
@@ -196,6 +210,8 @@ public final class Util {
 
         sql.insertRowIntoTag(getTagIdFromString(TagName), FilePath);
 
+        int TagID = getTagIdFromString(TagName);
+
         if(filesTagMap.containsKey(FilePath)){
             List<Integer> tmp = filesTagMap.get(FilePath);
             tmp.add(getTagIdFromString(TagName));
@@ -204,6 +220,17 @@ public final class Util {
             List<Integer> tmp = new ArrayList<>();
             tmp.add(getTagIdFromString(TagName));
             filesTagMap.put(FilePath, tmp);
+        }
+
+        if(tagIdPathMap.containsKey(TagID)){
+            List<String> tmp = tagIdPathMap.get(TagID);
+            tmp.add(FilePath);
+            tagIdPathMap.put(TagID, tmp);
+        }
+        else {
+            List<String> tmp = new ArrayList<>();
+            tmp.add(FilePath);
+            tagIdPathMap.put(TagID, tmp);
         }
 
         sql.closeConnection();
@@ -268,4 +295,19 @@ public final class Util {
     public static Map<String, Integer> getTagsMap(){return tagsMap;}
 
     public static Map<String, String> getTagsColorMap() {return tagsColorMap;}
+
+    public static List<File> getFilesFromTags(List<String> selectedTags){
+        Set<File> res = new HashSet<>();
+        selectedTags.forEach((tag) -> {
+            List<String> list = tagIdPathMap.get(getTagIdFromString(tag));
+            if(list != null) {
+                for (String path : list) {
+                    File f = new File(path);
+                    res.add(f);
+                }
+            }
+        });
+
+        return res.stream().toList();
+    }
 }

@@ -34,13 +34,14 @@ public class ExplorerController {
     private JFrame frame;
     private List<MItem> itemList;
     private boolean isLoadingFolder = false;
+    private List<String> selectedTags;
 
     public ExplorerController(ExplorerView view, ExplorerModel model){
         this.view = view;
         this.model = model;
 
         itemList = new ArrayList<>();
-
+        selectedTags = new ArrayList<>();
         initController();
         model.initModel();
     }
@@ -51,7 +52,6 @@ public class ExplorerController {
         leftShortcut.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println(leftShortcut.getComponentAt(leftShortcut.getSelectedIndex()).toString());
             }
 
             @Override
@@ -172,7 +172,12 @@ public class ExplorerController {
 
     private void tagFilterChanges(ActionEvent e){
         JToggleButton source = (JToggleButton) e.getSource();
-        System.out.println(source.getText() + " is: " + source.isSelected());
+        if(source.isSelected()){
+            selectedTags.add(source.getText());
+        }else {
+            selectedTags.remove(source.getText());
+        }
+        showFilesList(Util.getFilesFromTags(selectedTags));
     }
 
     private void refreshShortcutList(){
@@ -247,6 +252,48 @@ public class ExplorerController {
             @Override
             public Void doInBackground() {
                 for (File a : Arrays.stream(f.listFiles()).sorted(new ExplorerModel.CompareItems()).toList())
+                {
+                    if(a == null){continue;}
+                    MItem newItem = new MItem(a);
+                    addItemListener(newItem);
+                    publish(newItem);
+                }
+                return null;
+            }
+
+            @Override
+            protected void process(List<MItem> chunks) {
+                for(MItem a : chunks){
+                    view.addItem(a);
+                    itemList.add(a);
+                }
+            }
+
+            @Override
+            protected void done() {
+                isLoadingFolder = false;
+                return;
+            }
+        };
+        worker.execute();
+    }
+
+    private void showFilesList(List<File> files){
+
+        model.setOpenedFolder(null);
+        view.fileView_p.removeAll();
+        view.fileView_p.repaint();
+        view.fileView_p.revalidate();
+        if(files.isEmpty()){return;}
+
+
+        itemList = new ArrayList<>();
+        isLoadingFolder = true;
+
+        SwingWorker<Void, MItem> worker = new SwingWorker<Void, MItem>() {
+            @Override
+            public Void doInBackground() {
+                for (File a : files)
                 {
                     if(a == null){continue;}
                     MItem newItem = new MItem(a);
