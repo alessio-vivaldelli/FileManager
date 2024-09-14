@@ -44,6 +44,7 @@ public class ExplorerView extends TabPage {
     public JPanel shortcutListBar;
     public JPanel disksListBar;
     public JPanel cloudListBar;
+    public JPanel insideTagPanel;
 
     public ExplorerView() {
         super("File Explorer " + count);
@@ -161,20 +162,15 @@ public class ExplorerView extends TabPage {
 
         leftPanel.add(shortcutListBar, "growx,gapleft 0, gapright 0");
 
+
         tagsListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0"));
         JLabel tagsTitle = new JLabel("Tags");
+        insideTagPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 0,0));
         tagsTitle.setHorizontalAlignment(SwingConstants.CENTER);
         tagsTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
         tagsListBar.add(tagsTitle, "growx,pad 0,gapbottom 5,gaptop 10");
+        tagsListBar.add(insideTagPanel, "growx,pad 0");
 
-//        for (int i = 0; i < 5; i++) {
-//            JToggleButton b = new JToggleButton("Test tag");
-//            b.setIcon(new CircleIcon("#58E8E8"));
-//            b.setHorizontalAlignment(JButton.LEFT);
-//            b.setFocusable(false);
-//            b.putClientProperty("JButton.buttonType", "borderless");
-//            tagsListBar.add(b, "growx,pad 0,gapbottom 2,gaptop 2");
-//        }
 
         newTagButton = new JButton("New Tag"){
             @Override
@@ -223,6 +219,9 @@ public class ExplorerView extends TabPage {
 
 
         JScrollPane leftScrollPanel = new JScrollPane(leftPanel);
+        leftScrollPanel.getVerticalScrollBar().setUnitIncrement(10);
+        leftScrollPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        leftScrollPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
         leftScrollPanel.setPreferredSize(new Dimension( 200, 50));
 
 
@@ -296,12 +295,18 @@ public class ExplorerView extends TabPage {
     }
 
     public JToggleButton addTagItem(String name, String color){
-        JToggleButton b = new JToggleButton(name);
+        JToggleButton b = new JToggleButton(name){
+            @Override
+            public Dimension getPreferredSize() {
+
+                return super.getPreferredSize();
+            }
+        };
         b.setIcon(new CircleIcon(color));
         b.setHorizontalAlignment(JButton.LEFT);
         b.setFocusable(false);
         b.putClientProperty("JButton.buttonType", "borderless");
-        tagsListBar.add(b, ExplorerView.TAG_ITEM_CONSTRAINS, 1);
+        insideTagPanel.add(b, 0);
         return b;
     }
 
