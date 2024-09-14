@@ -11,6 +11,7 @@ public class SearchText extends JLabel {
     public SearchText(){
         super();
         putClientProperty("FlatLaf.style", "arc: 999; border: 2,10,2,10,#135b76");
+        putClientProperty( "FlatLaf.styleClass", "h4" );
         setVisible(false);
         initTimer();
     }

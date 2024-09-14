@@ -30,7 +30,12 @@ public class SQLiteManage {
                 appDataPath = userHome + "/.local/share/FileManager/";
             }
 
-            if (!(new File(appDataPath + "/").mkdirs())){System.out.println("Error on creating database folder");}
+            File dbFolder = new File(appDataPath + "/");
+            if(!(dbFolder.exists())) {
+                if (!(dbFolder.mkdirs())) {
+                    System.out.println("Error on creating database folder");
+                }
+            }
 
             String url = String.format("jdbc:sqlite:%s/main_database.sqlite", appDataPath);
             connection = DriverManager.getConnection(url);
@@ -48,15 +53,15 @@ public class SQLiteManage {
                 CREATE TABLE IF NOT EXISTS %s (
                  id integer PRIMARY KEY,
                  TagName text NOT NULL,
-                 TagColor integer NOT NULL,
-                 TaggedElements integer NOT NULL,
+                 TagColor text NOT NULL,
+                 TaggedElements integer NOT NULL
                 );""".formatted(SQLiteManage.TAG_INFO_TABLE);
         }else if(table.equals(SQLiteManage.TAG_TABLE)){
             sql = """
                 CREATE TABLE IF NOT EXISTS %s (
                  id integer PRIMARY KEY,
                  TagID integer NOT NULL,
-                 FilePath text NOT NULL,
+                 FilePath text NOT NULL
                 );""".formatted(SQLiteManage.TAG_TABLE);
         }else if(table.equals(SQLiteManage.FAVOURITES_TABLE)){
             sql = """
@@ -76,15 +81,67 @@ public class SQLiteManage {
         }
     }
 
-    public void insertRow(String name, String email) {
-        String insertSQL = "INSERT INTO users (name, email) VALUES (?,?);";
+    public void insertRowIntoFavourites(boolean isShortcut, String displayName, String filePath) {
+        String insertSQL = "INSERT INTO %s (isShortcut, DisplayName, FolderPath) VALUES (?,?,?);".formatted(SQLiteManage.FAVOURITES_TABLE);
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, email);
+            preparedStatement.setBoolean(1, isShortcut);
+            preparedStatement.setString(2, displayName);
+            preparedStatement.setString(3, filePath);
+            preparedStatement.execute();
         } catch (SQLException e) {
-            System.out.println("Error on insert: " + e.getMessage());
+            System.out.println("Error on insert favourite row:\n" + insertSQL);
+            System.out.println(e.getMessage());
         }
     }
+
+    public void insertRowIntoTagInfo(String TagName, String TagColor, int TaggedElements) {
+        String insertSQL = "INSERT INTO %s (TagName, TagColor, TaggedElements) VALUES (?,?,?)".formatted(SQLiteManage.TAG_INFO_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setString(1, TagName);
+            preparedStatement.setString(2, TagColor);
+            preparedStatement.setInt(3, TaggedElements);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on insert favourite row:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void insertRowIntoTag(int TagID, String FilePath) {
+        String insertSQL = "INSERT INTO %s (TagID, FilePath) VALUES (?,?);\n".formatted(SQLiteManage.TAG_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setInt(1, TagID);
+            preparedStatement.setString(2, FilePath);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on insert favourite row:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void removeFromFavouriteTable(String filePath, boolean isShortcut){
+        String insertSQL = "DELETE FROM %s WHERE FolderPath = ? AND isShortcut = ?;".formatted(SQLiteManage.FAVOURITES_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setString(1, filePath);
+            preparedStatement.setBoolean(2, isShortcut);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on insert favourite row:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void removeTagFromFile(String filePath){
+        String insertSQL = "DELETE FROM %s WHERE FilePath = ?;".formatted(SQLiteManage.TAG_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setString(1, filePath);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on insert favourite row:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+    }
+
 
     public boolean checkTableExist(String name) {
         String checkSQL = "SELECT * FROM sqlite_master WHERE type='table' AND name=?;";

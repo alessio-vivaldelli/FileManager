@@ -1,6 +1,7 @@
 package org.example.model;
 
 import org.example.MItem;
+import org.example.Util;
 import org.example.view.Item;
 import org.example.view.TagView;
 
@@ -9,21 +10,70 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ItemModel implements Model {
     final public static String NEW_ITEM = "new_folder_item";
+    final public static String REFRESH_TAGS = "tag_list_refresh";
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
     List<TagView> itemTags = new ArrayList<>();
 
+    private File file = null;
+    public boolean isFavourite = false;
+    private List<String> subTags = new ArrayList<>();
+    public Map<String, String> tagsMap;
+
     private File lastOpenedFolder = null;
 
-    public ItemModel(){
+    public ItemModel(File file){
+        this.file = file;
+        initModel();
     }
+
+
+    private void initModel(){
+        getAllTags();
+        refreshTags();
+
+        isFavourite = Util.isFileFavourite(file);
+        if (isFavourite){
+            System.out.println(" ");
+        }
+    }
+
+    private void getAllTags(){
+        tagsMap = Util.getTagsColorMap();
+    }
+
+    public void setFavourite(boolean favourite){
+        this.isFavourite = favourite;
+        if(favourite){
+            Util.addFavourite("", file.getPath());
+        }else {
+            Util.removeFavourite("", file.getPath());
+        }
+    }
+
+    public boolean isFavourite(){return isFavourite;}
+
+    public List<String> getSubTags(){return subTags;}
+
+    public void refreshTags(){
+        subTags = Util.getSubsTags(file);
+
+        propertyChangeSupport.firePropertyChange(ItemModel.REFRESH_TAGS, null, subTags);
+    }
+
+    public File getFile(){return this.file;}
 
     public void newTag(TagView tag){
 //        itemTags.add(tag);
         return;
+    }
+
+    public void newTagSelected(String name){
+        Util.newFileTag(name, file.getPath());
     }
 
     public void lastOpenedFolder(File item){

@@ -21,14 +21,14 @@ public class StarIcon
     private final Color whiteColor = UIManager.getColor( "Actions.White" );
 
     public StarIcon() {
-        super( 16, 16, UIManager.getColor( "Actions.Grey" ) );
+        super( 16, 16, UIManager.getColor( "Action.Grey" ) );
     }
     public StarIcon(boolean isSelected) {
-        super( 16, 16, UIManager.getColor( "Actions.Grey" ) );
+        super( 16, 16, UIManager.getColor( "Action.Grey" ) );
         this.isSelected = isSelected;
     }
     public StarIcon(int size, int innerRadius, int outerRadius, int numRays) {
-        super( size, size, UIManager.getColor( "Actions.Grey" ) );
+        super( size, size, UIManager.getColor( "Action.Grey" ) );
         this.size = size;
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;
@@ -85,10 +85,10 @@ public class StarIcon
     protected void paintIcon( Component c, Graphics2D g ) {
         g.setRenderingHint( RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE );
         g.setStroke( new BasicStroke( 1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
-        g.setColor( whiteColor );
+//        g.setColor( UIManager.getColor( "Object.Grey" ) );
         g.setStroke(new BasicStroke(2));
         if(isSelected){
-            g.fill(createStar(size / 2, size / 2, innerRadius, outerRadius, numRays, Math.toRadians(-18)));
+            g.fill(createStar(size / 2, size / 2, innerRadius + 1, outerRadius + 1, numRays, Math.toRadians(-18)));
         }else {
             g.draw(createStar(size / 2, size / 2, innerRadius, outerRadius, numRays, Math.toRadians(-18)));
         }

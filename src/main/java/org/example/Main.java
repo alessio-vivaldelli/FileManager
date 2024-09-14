@@ -1,27 +1,13 @@
 package org.example;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import net.miginfocom.swing.MigLayout;
 import org.example.controller.MyTabbedPaneController;
 import org.example.model.MyTabbedPaneModel;
-import org.example.view.ExplorerView;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.net.URL;
-import java.util.function.BiConsumer;
-import com.formdev.flatlaf.extras.*;
+
 import org.example.view.MyTabbedPaneView;
-import com.formdev.flatlaf.extras.*;
 
 // TODO:
 // Typography: https://www.formdev.com/flatlaf/typography/
@@ -57,6 +43,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new FlatMacDarkLaf());
+//            UIManager.setLookAndFeel(new FlatMacLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
@@ -64,13 +51,13 @@ public class Main {
         screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
         // Sey Style: https://www.formdev.com/flatlaf/components/tree/
         UIManager.put("Tree.showDefaultIcons", true);
-//        UIManager.put("Tree.openIcon", new FlatSVGIcon( "icons/buildLoadChanges.svg" ));
         UIManager.put("Tree.leafIcon", (Icon) UIManager.get("FileView.directoryIcon"));
         UIManager.put("Tree.paintLines", true);
         UIManager.put("Tree.scrollsOnExpand", true);
-
+        UIManager.put("ScrollPane.border", false);
         UIManager.put("Tree.background", Color.TRANSLUCENT);
 
+        Util.initDatabaseData();
 
         JFrame frame = new JFrame("File Explorer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

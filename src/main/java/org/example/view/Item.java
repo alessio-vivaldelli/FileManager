@@ -1,10 +1,6 @@
 package org.example.view;
 
-import com.formdev.flatlaf.icons.FlatFileChooserHomeFolderIcon;
-import org.example.Icons.ClosedFolderIcon;
-import org.example.Icons.FileIcon;
-import org.example.Icons.FlatDotsIcon;
-import org.example.Icons.StarIcon;
+import org.example.Icons.*;
 import org.example.Main;
 
 import javax.imageio.ImageIO;
@@ -18,7 +14,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 public class Item extends JPanel {
     public File file;
@@ -27,9 +22,10 @@ public class Item extends JPanel {
 //    private List<TagView> lists = new ArrayList<>();
     private JPanel tagsPanel;
     private JButton button;
-    private JButton menuButton;
+    private JButton tagMenuButton;
     private JButton starButton;
     private JPopupMenu popupMenu;
+    public JMenuItem newTagButton;
 
     public Item(File f) {
         super();
@@ -46,9 +42,14 @@ public class Item extends JPanel {
         lp.setBounds(0, 0, Item.getItemOuterPreferredSize().width, Item.getItemOuterPreferredSize().height);
 
         popupMenu = new JPopupMenu();
-        JMenuItem menuItem1 = new JMenuItem("Delete");
-        JMenuItem menuItem2 = new JMenuItem("Rename");
-        popupMenu.add(menuItem1); popupMenu.add(menuItem2);
+//        JCheckBoxMenuItem m1 = new JCheckBoxMenuItem("Tag1");
+//        JCheckBoxMenuItem m2 = new JCheckBoxMenuItem("Tag2");
+//        JCheckBoxMenuItem m3 = new JCheckBoxMenuItem("Tag3");
+        popupMenu.addSeparator();
+        newTagButton = new JMenuItem("New Tag");
+        popupMenu.add(newTagButton);
+//
+//        popupMenu.add(m1); popupMenu.add(m2); popupMenu.add(m3); popupMenu.addSeparator(); popupMenu.add(newTagButton);
 
         JLabel label = new JLabel();
         final int labelIconSize = Item.getIconSize();
@@ -96,8 +97,6 @@ public class Item extends JPanel {
 
 
 
-
-
         label.setVerticalTextPosition(SwingConstants.BOTTOM);
         label.setHorizontalTextPosition(SwingConstants.CENTER);
 
@@ -106,16 +105,16 @@ public class Item extends JPanel {
         button.putClientProperty("JButton.buttonType", "borderless");
         button.setBounds(0, 0, Item.getItemOuterPreferredSize().width, Item.getItemOuterPreferredSize().height);;
 
-        menuButton = new JButton();
-        menuButton.setIcon(new FlatDotsIcon());
-        menuButton.setBounds(0,5,menuButton.getPreferredSize().width, menuButton.getPreferredSize().height);
-        menuButton.putClientProperty("JButton.buttonType", "borderless");
-        menuButton.setFocusable(false);
+        tagMenuButton = new JButton();
+        tagMenuButton.setIcon(new TagIcon(18));
+        tagMenuButton.setBounds(0,5, tagMenuButton.getPreferredSize().width, tagMenuButton.getPreferredSize().height);
+        tagMenuButton.putClientProperty("JButton.buttonType", "borderless");
+        tagMenuButton.setFocusable(false);
 
-        menuButton.addActionListener(new ActionListener() {
+        tagMenuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                popupMenu.show(menuButton, menuButton.getWidth() / 2, menuButton.getHeight() / 2);
+                popupMenu.show(tagMenuButton, tagMenuButton.getWidth() / 2, tagMenuButton.getHeight() / 2);
             }
         });
 
@@ -134,14 +133,14 @@ public class Item extends JPanel {
         topPanel.add(label, BorderLayout.CENTER);
         JPanel buttons = new JPanel(new BorderLayout());
         buttons.setOpaque(false);
-        buttons.add(menuButton, BorderLayout.WEST);
+        buttons.add(tagMenuButton, BorderLayout.WEST);
         buttons.add(starButton, BorderLayout.EAST);
 
         tagsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 //        tagsPanel.setBorder(new EmptyBorder(5,5,5,5));
         tagsPanel.setOpaque(false);
 
-        topPanel.add(tagsPanel, BorderLayout.SOUTH);
+//        topPanel.add(tagsPanel, BorderLayout.SOUTH);
         tagsPanel.setPreferredSize(new Dimension(Item.getItemPreferredSize().width, (int)(Item.getItemPreferredSize().height * 0.25)));
 //        for (int j = 0; j < 3; j++) {
 ////            TagView tmp = new TagView("Architettura");
@@ -151,7 +150,7 @@ public class Item extends JPanel {
 //        }
 
         lp.add(button, 1 );
-        lp.add(menuButton, 1);
+        lp.add(tagMenuButton, 1);
         lp.add(starButton, 1);
 
         this.add(lp, BorderLayout.CENTER);
@@ -227,8 +226,8 @@ public class Item extends JPanel {
     public JButton getItemButton(){
         return button;
     }
-    public JButton getMenuButton(){
-        return menuButton;
+    public JButton getTagMenuButton(){
+        return tagMenuButton;
     }
     public JButton getStarButton(){
         return starButton;

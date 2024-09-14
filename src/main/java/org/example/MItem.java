@@ -13,7 +13,11 @@ public class MItem extends Item {
 
     public MItem(File file){
         super(file);
-        setModel(new ItemModel());
+        init();
+    }
+
+    private void init(){
+        setModel(new ItemModel(file));
         new ItemController(this, this.model);
     }
 
