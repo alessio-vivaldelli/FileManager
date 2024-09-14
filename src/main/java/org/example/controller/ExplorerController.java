@@ -1,13 +1,15 @@
 package org.example.controller;
 
 import org.example.MItem;
+import org.example.Util;
+import org.example.Utilities.CloudPathFinder;
 import org.example.model.ItemModel;
-import org.example.view.Item;
 import org.example.ShortcutItem;
 import org.example.model.ExplorerModel;
 import org.example.view.ExplorerView;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -17,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.formdev.flatlaf.extras.*;
 
@@ -30,6 +33,7 @@ public class ExplorerController {
     private boolean isFocused = true;
     private JFrame frame;
     private List<MItem> itemList;
+    private boolean isLoadingFolder = false;
 
     public ExplorerController(ExplorerView view, ExplorerModel model){
         this.view = view;
@@ -78,11 +82,12 @@ public class ExplorerController {
         tree = view.getTree();
         DefaultMutableTreeNode root = model.createTree(new File("This Computer"));
 
-        for (File file : File.listRoots()){
-            System.out.println(file.getPath());
-            root.add(model.createTree(file));
-        }
-        ((DefaultTreeModel) tree.getModel()).setRoot(root);
+        //TODO: decidere se tenere il tree
+//        for (File file : File.listRoots()){
+//            System.out.println(file.getPath());
+//            root.add(model.createTree(file));
+//        }
+//        ((DefaultTreeModel) tree.getModel()).setRoot(root);
 
         tree.addTreeSelectionListener(this::treeSelectionChange);
 
@@ -151,6 +156,53 @@ public class ExplorerController {
             }
         });
 
+        refreshTagsList();
+        refreshShortcutList();
+        refreshDisksList();
+        refreshCloudList();
+    }
+
+    // TODO: handle multiple tag selection
+    private void refreshTagsList(){
+        for (Map.Entry<String, String> elem : Util.getTagsColorMap().entrySet()){
+            JToggleButton tmp = view.addTagItem(elem.getKey(), elem.getValue());
+            tmp.addActionListener(this::tagFilterChanges);
+        }
+    }
+
+    private void tagFilterChanges(ActionEvent e){
+        JToggleButton source = (JToggleButton) e.getSource();
+        System.out.println(source.getText() + " is: " + source.isSelected());
+    }
+
+    private void refreshShortcutList(){
+        Util.getShortcutData().forEach((elem) -> {
+            JButton tmp = view.addShortcutItem(elem);
+            tmp.addActionListener(this::handleLeftPanelClicks);
+        });
+    }
+
+    private void refreshDisksList(){
+        for(File file : File.listRoots()){
+            JButton tmp = view.addDiskItem(file);
+            tmp.addActionListener(this::handleLeftPanelClicks);
+        }
+    }
+
+    private void refreshCloudList(){
+        for(String file : CloudPathFinder.getCloudPaths()){
+            JButton tmp = view.addCloudItem(new File(file));
+            tmp.addActionListener(this::handleLeftPanelClicks);
+        }
+    }
+
+    private void handleLeftPanelClicks(ActionEvent e){
+        String path = e.getSource().toString();
+        if(path.equals("Favourite")){return;}
+        File f = new File(path);
+        if(f.equals(model.getOpenedFolder())){return;}
+        if(isLoadingFolder){return;}
+        showFolder(f);
     }
 
     private boolean filterItemsByText(String filterText){
@@ -183,11 +235,13 @@ public class ExplorerController {
 
     private void showFolder(File f){
         if(f == null){return;}
+        model.setOpenedFolder(f);
         view.fileView_p.removeAll();
         view.fileView_p.repaint();
         view.fileView_p.revalidate();
 
         itemList = new ArrayList<>();
+        isLoadingFolder = true;
 
         SwingWorker<Void, MItem> worker = new SwingWorker<Void, MItem>() {
             @Override
@@ -212,6 +266,7 @@ public class ExplorerController {
 
             @Override
             protected void done() {
+                isLoadingFolder = false;
                 return;
             }
         };

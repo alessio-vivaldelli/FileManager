@@ -2,6 +2,7 @@ package org.example.model;
 
 import org.example.MItem;
 import org.example.ShortcutItem;
+import org.example.Util;
 
 import javax.swing.*;
 import javax.swing.event.SwingPropertyChangeSupport;
@@ -19,45 +20,26 @@ public class ExplorerModel implements Model {
 
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
-    private List<ShortcutItem> leftShortcutTabs;
+    private List<String> shorcutList;
+    private List<String> tagList;
 
-    private static DefaultMutableTreeNode top;
+    private File openedFolder;
+
     private static final String windowsTopName = "This PC";
 
     public ExplorerModel(){
-        leftShortcutTabs = new ArrayList<>();
+        shorcutList = new ArrayList<>();
+        openedFolder = null;
     }
 
     public void initModel() {
-        initTree();
 
     }
 
-    private void initLeftShortcut(){
-
+    public void setOpenedFolder(File file){
+        openedFolder = file;
     }
-
-
-    public void initTree(){}
-
-
-    public void TMinitTree(){
-
-
-        propertyChangeSupport.firePropertyChange(ExplorerModel.TREE_INIT, null, top);
-    }
-
-    public void addLeftShortcut(String path, String iconPath){
-
-        ShortcutItem item = new ShortcutItem(path, iconPath);
-        leftShortcutTabs.add(item);
-
-        propertyChangeSupport.firePropertyChange(ExplorerModel.NEW_SHORTCUT, null, item);
-    }
-
-    public void showCurrentDirectory(File dir){
-
-    }
+    public File getOpenedFolder(){return openedFolder;}
 
     public DefaultMutableTreeNode createTree(File temp) {
         DefaultMutableTreeNode topNode = new DefaultMutableTreeNode(temp);
