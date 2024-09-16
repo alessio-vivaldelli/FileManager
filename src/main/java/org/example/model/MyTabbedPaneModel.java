@@ -88,6 +88,11 @@ public class MyTabbedPaneModel implements Model {
     }
 
     @Override
+    public void subscribeToModel(Model e) {
+
+    }
+
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);
     }

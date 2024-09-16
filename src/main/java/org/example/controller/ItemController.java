@@ -6,6 +6,7 @@ import org.example.Util;
 import org.example.model.ExplorerModel;
 import org.example.model.ItemModel;
 import org.example.view.Item;
+import org.example.view.TagView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -34,17 +35,17 @@ public class ItemController {
 
         JButton mainButton = view.getItemButton();
         mainButton.addActionListener(event -> {
-            mainButton.setSelected(true);
+//            mainButton.setSelected(true);
         });
 
         mainButton.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
-                        if (view.file.isDirectory()){
-    //                        openFolder();
-                            model.lastOpenedFolder(view.file);
-                        }
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    if (view.file.isDirectory()){
+//                        openFolder();
+                        model.lastOpenedFolder(view.file);
+                    }
                 }
             }
             @Override
@@ -71,16 +72,27 @@ public class ItemController {
         starButton.addActionListener(this::starClicked);
 
         model.addPropertyChangeListener(ItemModel.REFRESH_TAGS, this::tagsRefreshed);
+        model.addPropertyChangeListener(ExplorerModel.TAG_DELETED, this::tagDeleted);
+
         setStarStatus(model.isFavourite());
 
 
         setTagsMenu();
-        view.newTagButton.addActionListener(this::newTagClicked);
-
         model.refreshTags();
     }
 
+    private void tagDeleted(PropertyChangeEvent e){
+        int count = view.getPopupMenu().getComponentCount();
+        for (int i = 0; i < count; i++) {
+            if( ((JCheckBoxMenuItem) view.getPopupMenu().getComponent(i)).getText().equals(e.getNewValue()) ){
+                view.getPopupMenu().remove(i);
+                break;
+            }
+        }
+    }
+
     private void setTagsMenu(){
+        view.getPopupMenu().removeAll();
         model.tagsMap.forEach((key, value) -> {
             JCheckBoxMenuItem tmp = new JCheckBoxMenuItem(key);
             tmp.addActionListener(this::tagSelected);
@@ -88,25 +100,24 @@ public class ItemController {
         });
     }
 
-    private void addTagMenu(String name){
-        JCheckBoxMenuItem tmp = new JCheckBoxMenuItem(name);
-        tmp.addActionListener(this::tagSelected);
-        view.getPopupMenu().add(tmp, 0);
-    }
-
-    private void newTagClicked(ActionEvent e){
-
-    }
-
     private void tagSelected(ActionEvent e){
         String tmp = ((JCheckBoxMenuItem) e.getSource()).getText();
-        model.newTagSelected(tmp);
+        boolean selected = ((JCheckBoxMenuItem) e.getSource()).isSelected();
+        if(selected) {
+            view.tagsPanel.addTag(tmp);
+            model.newTagSelected(tmp);
+        }else {
+            view.tagsPanel.removeTag(tmp);
+            model.removeTag(tmp);
+        }
     }
 
     private void tagsRefreshed(PropertyChangeEvent e){
         List<String> subs = (List<String>) e.getNewValue();
 
-        for (int i = 0; i < view.getPopupMenu().getComponentCount()-2; i++) {
+        view.tagsPanel.setTags(subs); // refresh colored circles below item label
+
+        for (int i = 0; i < view.getPopupMenu().getComponentCount(); i++) {
             JCheckBoxMenuItem tmp = (JCheckBoxMenuItem) view.getPopupMenu().getComponent(i);
             if(subs.contains( tmp.getText())){
                 ((JCheckBoxMenuItem) view.getPopupMenu().getComponent(i)).setSelected(true);
@@ -123,7 +134,6 @@ public class ItemController {
         ((StarIcon) starButton.getIcon()).setIsSelected(status);
         model.isFavourite = status;
     }
-
 
     private void openFolder(){
 

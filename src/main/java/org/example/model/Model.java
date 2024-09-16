@@ -5,6 +5,8 @@ import java.beans.PropertyChangeListener;
 
 public interface Model {
 
+    public void subscribeToModel(Model e);
+
     public void addPropertyChangeListener(PropertyChangeListener listener);
 
     public void removePropertyChangeListener(PropertyChangeListener listener);

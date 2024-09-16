@@ -28,13 +28,7 @@ public class MItem extends Item {
         return model;
     }
 
-    @Override
-    public void addNewTag(TagView tag) {
-        if(model != null){System.out.println("NOT NULL");}
 
-//        this.model.newTag(tag);
-        super.addNewTag(tag);
-    }
 
     @Override
     public String toString() {

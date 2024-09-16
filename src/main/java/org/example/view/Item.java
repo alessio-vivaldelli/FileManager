@@ -14,13 +14,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 public class Item extends JPanel {
     public File file;
     private FileSystemView mView = FileSystemView.getFileSystemView();
     private static final Map<String, Icon> iconCache = new HashMap<>();
 //    private List<TagView> lists = new ArrayList<>();
-    private JPanel tagsPanel;
+    public TagView tagsPanel;
     private JButton button;
     private JButton tagMenuButton;
     private JButton starButton;
@@ -45,9 +46,9 @@ public class Item extends JPanel {
 //        JCheckBoxMenuItem m1 = new JCheckBoxMenuItem("Tag1");
 //        JCheckBoxMenuItem m2 = new JCheckBoxMenuItem("Tag2");
 //        JCheckBoxMenuItem m3 = new JCheckBoxMenuItem("Tag3");
-        popupMenu.addSeparator();
-        newTagButton = new JMenuItem("New Tag");
-        popupMenu.add(newTagButton);
+//        popupMenu.addSeparator();
+//        newTagButton = new JMenuItem("New Tag");
+//        popupMenu.add(newTagButton);
 //
 //        popupMenu.add(m1); popupMenu.add(m2); popupMenu.add(m3); popupMenu.addSeparator(); popupMenu.add(newTagButton);
 
@@ -136,18 +137,9 @@ public class Item extends JPanel {
         buttons.add(tagMenuButton, BorderLayout.WEST);
         buttons.add(starButton, BorderLayout.EAST);
 
-        tagsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-//        tagsPanel.setBorder(new EmptyBorder(5,5,5,5));
-        tagsPanel.setOpaque(false);
-
-//        topPanel.add(tagsPanel, BorderLayout.SOUTH);
-        tagsPanel.setPreferredSize(new Dimension(Item.getItemPreferredSize().width, (int)(Item.getItemPreferredSize().height * 0.25)));
-//        for (int j = 0; j < 3; j++) {
-////            TagView tmp = new TagView("Architettura");
-//////            lists.add(tmp);
-////            tagsPanel.add(tmp);
-//            addNewTag(new TagView("Architettura"));
-//        }
+        List<String> tmp = new ArrayList<>();
+        tagsPanel = new TagView(tmp);
+        topPanel.add(tagsPanel, BorderLayout.SOUTH);
 
         lp.add(button, 1 );
         lp.add(tagMenuButton, 1);
@@ -171,36 +163,6 @@ public class Item extends JPanel {
     public static int getIconSize(){
         return (int)(Item.getItemPreferredSize().width*0.7);
     }
-
-
-    public void addNewTag(TagView tag){
-        tagsPanel.add(tag);
-
-        int rowP = 1;
-        int pixel = 0;
-        int hiddenElements = 0;
-        int tagsHigh = ((TagView) tagsPanel.getComponent(0)).getTextDimension().height;
-        int panelHeight = tagsPanel.getPreferredSize().height;
-        int panelWidth = tagsPanel.getPreferredSize().width;
-
-        TagView lastElem = ((TagView) tagsPanel.getComponent(0));
-        for (Component comp : tagsPanel.getComponents()){
-            TagView a = (TagView) comp;
-            pixel += a.getTextDimension().width;
-            if (pixel >= panelWidth) {
-                rowP += 1;
-                pixel = a.getTextDimension().width;
-            }
-            if(rowP*tagsHigh >= panelHeight){
-                a.setVisible(false);
-                if(hiddenElements == 0){
-                    lastElem.setIsMore(true);
-                }hiddenElements += 1;
-            }a.setIsMore(false);
-            lastElem = a;
-        }
-    }
-
 
     private Icon getCachedIcon(File file, int iconSize) {
         String extension = getFileExtension(file);

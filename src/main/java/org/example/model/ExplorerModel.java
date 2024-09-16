@@ -17,6 +17,8 @@ public class ExplorerModel implements Model {
     final public static String NEW_SHORTCUT = "new_shortcut";
     final public static String TREE_INIT = "tree_initialized";
     final public static String NEW_ITEM = "new_folder_item";
+    final public static String TAG_DELETED = "tag_deleted_from_explorer";
+
 
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
@@ -36,6 +38,21 @@ public class ExplorerModel implements Model {
 
     }
 
+    public boolean isTagDuplicated(String tagName){
+        return Util.getTagsMap().containsKey(tagName);
+    }
+
+    // TODO: update listeners like MItem witch has to update popup menu
+    public void newTag(String tagName, String tagColor){
+        Util.newTag(tagName, tagColor);
+    }
+
+    // TODO: update listeners like MItem witch has to update popup menu
+    public void deleteTag(String tagName){
+        Util.deleteTag(tagName);
+        propertyChangeSupport.firePropertyChange(ExplorerModel.TAG_DELETED, null, tagName);
+    }
+
     public void setOpenedFolder(File file){
         openedFolder = file;
     }
@@ -52,6 +69,7 @@ public class ExplorerModel implements Model {
 
         return topNode;
     }
+
     private void fillTree(DefaultMutableTreeNode node, String fileName) {
 //		tree.setEnabled(false);
 
@@ -98,6 +116,11 @@ public class ExplorerModel implements Model {
 
     public void addItem(MItem item){
         propertyChangeSupport.firePropertyChange(ExplorerModel.NEW_ITEM, null, item);
+    }
+
+    @Override
+    public void subscribeToModel(Model e) {
+
     }
 
     @Override

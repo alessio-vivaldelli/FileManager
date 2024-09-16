@@ -13,6 +13,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
@@ -160,6 +161,42 @@ public class ExplorerController {
         refreshShortcutList();
         refreshDisksList();
         refreshCloudList();
+
+        view.getNewTagText().addActionListener(this::newTagConfirmed);
+        view.getNewTagText().addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if(model.isTagDuplicated(view.getNewTagText().getText() + e.getKeyChar())){
+                    System.out.println("DUPLICATED");
+                    view.getNewTagText().setForeground(Color.RED);
+                }else {
+                    view.getNewTagText().setForeground((Color) UIManager.get("TextField.foreground"));
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+    }
+
+    private void newTagConfirmed(ActionEvent e){
+        JTextField field = ((JTextField)e.getSource());
+        String newTag = field.getText();
+
+        if(model.isTagDuplicated(newTag)){return;}
+        field.setText("");
+        field.setFocusable(false); field.setFocusable(true);
+
+
+        view.addTagItem(newTag, view.getNewTagColor());
+        model.newTag(newTag, view.getNewTagColor());
     }
 
     // TODO: handle multiple tag selection
@@ -167,6 +204,37 @@ public class ExplorerController {
         for (Map.Entry<String, String> elem : Util.getTagsColorMap().entrySet()){
             JToggleButton tmp = view.addTagItem(elem.getKey(), elem.getValue());
             tmp.addActionListener(this::tagFilterChanges);
+            tmp.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if(SwingUtilities.isRightMouseButton(e)){
+
+                    }else if(SwingUtilities.isMiddleMouseButton(e)){
+                        view.removeTagElement(elem.getKey());
+                        model.deleteTag(elem.getKey());
+                    }
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+
+                }
+            });
         }
     }
 
@@ -216,6 +284,7 @@ public class ExplorerController {
         return !res.isEmpty();
     }
 
+
     private void newItem(PropertyChangeEvent e){
         showFolder((File) e.getNewValue());
     }
@@ -255,6 +324,7 @@ public class ExplorerController {
                 {
                     if(a == null){continue;}
                     MItem newItem = new MItem(a);
+                    newItem.getModel().subscribeToModel(model);
                     addItemListener(newItem);
                     publish(newItem);
                 }
@@ -297,6 +367,7 @@ public class ExplorerController {
                 {
                     if(a == null){continue;}
                     MItem newItem = new MItem(a);
+                    newItem.getModel().subscribeToModel(model);
                     addItemListener(newItem);
                     publish(newItem);
                 }

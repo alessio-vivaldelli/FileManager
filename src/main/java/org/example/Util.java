@@ -182,9 +182,18 @@ public final class Util {
         sql.closeConnection();
     }
 
-    public static void removeTagFromFile(String filePath){
+    public static void removeTagFromFile(String filePath, String tag){
         SQLiteManage sql = new SQLiteManage();
-        sql.removeTagFromFile(filePath);
+        sql.removeTagFromFile(filePath, getTagIdFromString(tag));
+
+        List<Integer> tmp = filesTagMap.get(filePath);
+        tmp.remove(tmp.indexOf(getTagIdFromString(tag)));
+        filesTagMap.put(filePath, tmp);
+
+        List<String> tmp2 = tagIdPathMap.get(getTagIdFromString(tag));
+        tmp2.remove(tag);
+        tagIdPathMap.put(getTagIdFromString(tag), tmp2);
+
         sql.closeConnection();
     }
 
@@ -202,6 +211,25 @@ public final class Util {
         sql.insertRowIntoTagInfo(TagName, TagColor, -1);
         tagsMap.put(TagName, maxTagID);
         tagsColorMap.put(TagName, TagColor);
+        sql.closeConnection();
+    }
+
+    public static void  newTag(String TagName, String TagColor){
+        SQLiteManage sql = new SQLiteManage();
+        maxTagID++;
+        sql.insertRowIntoTagInfo(TagName, TagColor, -1);
+        tagsMap.put(TagName, maxTagID);
+        tagsColorMap.put(TagName, TagColor);
+        sql.closeConnection();
+    }
+
+    public static void deleteTag(String TagName){
+        SQLiteManage sql = new SQLiteManage();
+        sql.deleteTag(TagName);
+
+        loadTagInfoData(sql.getTableContent(SQLiteManage.TAG_INFO_TABLE));
+        loadTagsData(sql.getTableContent(SQLiteManage.TAG_TABLE));
+
         sql.closeConnection();
     }
 
@@ -266,17 +294,17 @@ public final class Util {
     public static String generateNewColor(){
         Random rand = new Random();
 
-        int base = 127; // 50% brightness
-        int r = base + rand.nextInt(128);
-        int g = base + rand.nextInt(128);
-        int b = base + rand.nextInt(128);
+        int base = 64; // 50% brightness
+        int r = base + rand.nextInt(190);
+        int g = base + rand.nextInt(190);
+        int b = base + rand.nextInt(190);
 
         Color pastelColor = new Color(r, g, b);
 
-        while (!(colorExist(colorToHEX(pastelColor)))){
-            r = base + rand.nextInt(128);
-            g = base + rand.nextInt(128);
-            b = base + rand.nextInt(128);
+        while ((colorExist(colorToHEX(pastelColor)))){
+            r = base + rand.nextInt(190);
+            g = base + rand.nextInt(190);
+            b = base + rand.nextInt(190);
             pastelColor = new Color(r, g, b);
         }
 

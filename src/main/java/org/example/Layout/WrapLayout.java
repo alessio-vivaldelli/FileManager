@@ -40,10 +40,7 @@ public class WrapLayout extends FlowLayout {
             int rowDim = 0;
             int maxRowDim = 0;
             compRows++;
-            int dbg = 0;
             for(Component c : target.getComponents()){
-                if (dbg==0){System.out.println(thisWidth);}
-                dbg++;
                 if((rowDim + c.getPreferredSize().width + getHgap()) >= thisWidth){
                     rowDim = c.getPreferredSize().width;
                     compRows++;
@@ -53,7 +50,6 @@ public class WrapLayout extends FlowLayout {
                 }
                 if(rowDim > maxRowDim){maxRowDim = rowDim;}
             }
-//            System.out.println(compRows);
             Dimension res = new Dimension(maxRowDim, compRows*(target.getComponent(0).getPreferredSize().height + getVgap()));
 
             this.setHgap(initialHGap);
@@ -78,6 +74,5 @@ public class WrapLayout extends FlowLayout {
             return new Dimension(30, 10);
         }
         return preferredLayoutSize(target);
-//        return new Dimension((maxDimensions.width + getHgap())*compColons, (int) ((maxDimensions.height*1.1f + getVgap())*compRows));
     }
 }

@@ -6,6 +6,7 @@ import org.example.view.Item;
 import org.example.view.TagView;
 
 import javax.swing.event.SwingPropertyChangeSupport;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class ItemModel implements Model {
     final public static String REFRESH_TAGS = "tag_list_refresh";
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
-    List<TagView> itemTags = new ArrayList<>();
 
     private File file = null;
     public boolean isFavourite = false;
@@ -31,6 +31,14 @@ public class ItemModel implements Model {
         initModel();
     }
 
+    public void subscribeToModel(Model e){
+        e.addPropertyChangeListener(ExplorerModel.TAG_DELETED, this::tagDeleted);
+    }
+
+    private void tagDeleted(PropertyChangeEvent e){
+
+        propertyChangeSupport.firePropertyChange(ExplorerModel.TAG_DELETED, null, e.getNewValue());
+    }
 
     private void initModel(){
         getAllTags();
@@ -38,6 +46,7 @@ public class ItemModel implements Model {
 
         isFavourite = Util.isFileFavourite(file);
         if (isFavourite){
+            // TODO: bohhhhhh
             System.out.println(" ");
         }
     }
@@ -57,8 +66,6 @@ public class ItemModel implements Model {
 
     public boolean isFavourite(){return isFavourite;}
 
-    public List<String> getSubTags(){return subTags;}
-
     public void refreshTags(){
         subTags = Util.getSubsTags(file);
 
@@ -74,6 +81,12 @@ public class ItemModel implements Model {
 
     public void newTagSelected(String name){
         Util.newFileTag(name, file.getPath());
+//        refreshTags();
+    }
+
+    public void removeTag(String name){
+        Util.removeTagFromFile(file.getPath(), name);
+//        refreshTags();
     }
 
     public void lastOpenedFolder(File item){

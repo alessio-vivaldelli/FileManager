@@ -1,60 +1,64 @@
 package org.example.view;
 
+import org.example.Util;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TagView extends JButton {
-    private String tag = "Default";
+public class TagView extends JPanel {
+    private List<String> tagsColor;
+    private int circleSize = 16;
+    private int overlap = 7;
 
-    public TagView(String tag, Color color){
+    public TagView(List<String> tags){
         super();
-        this.tag = tag;
+        setPreferredSize(new Dimension(200, (int) (circleSize*1.5f)));
+        setTags(tags);
         initUI();
-//        putClientProperty( "FlatLaf.style", "small");
     }
 
-    public TagView(String tag){
+    public TagView(){
         super();
-        this.tag = tag;
+        setPreferredSize(new Dimension(200, (int) (circleSize*1.5f)));
+        setTags(new ArrayList<>());
         initUI();
+    }
+
+    public void setTags(List<String> tags){
+        tagsColor = new ArrayList<>();
+        tags.forEach((tag) -> {
+            tagsColor.add(Util.getColorFromTag(tag));
+        });
+    }
+    public void addTag(String tag){
+        tagsColor.add(Util.getColorFromTag(tag));
+    }
+
+    public void removeTag(String tag){
+        tagsColor.remove(Util.getColorFromTag(tag));
     }
 
     private void initUI(){
-        setText(tag);
-        setMargin(new Insets(0, 0, 0, 0));
-        this.putClientProperty("JButton.buttonType", "roundRect");
         setFocusable(false);
+        setOpaque(false);
     }
 
     @Override
-    public void setText(String arg0) {
-        super.setText(arg0);
-        FontMetrics metrics = getFontMetrics(getFont());
-        int width = metrics.stringWidth( getText() );
-        int height = metrics.getHeight();
-        Dimension newDimension =  new Dimension((int) (width*1.5), (int) (height*1.5));
-        setPreferredSize(newDimension);
-        setBounds(new Rectangle(
-                getLocation(), getPreferredSize()));
-    }
+    public void paint(Graphics g) {
+        super.paint(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    public Dimension getTextDimension(){
-        FontMetrics metrics = getFontMetrics(getFont());
-        int width = metrics.stringWidth( getText() );
-        int height = metrics.getHeight();
-        Dimension newDimension =  new Dimension((int) (width*1.5), (int) (height*1.5));
-        return newDimension;
-    }
-    public void setIsMore(boolean more){
-       if(more){
-           setText("......");
-       }else {
-           setText(tag);
-       }
-    }
+        int len = tagsColor.size();
+        int x = ((this.getSize().width/2 - ((len*(circleSize-overlap)))/2));
+        int y = this.getSize().height/2 - (circleSize/2);
 
-    @Override
-    public String toString() {
-        return super.toString();
+        for (int i = 0; i < tagsColor.size(); i++) {
+            g.setColor(Color.decode(tagsColor.get(i)));
+            g.fillOval(x, y, circleSize, circleSize);
+            x += circleSize-overlap;
+        }
     }
 }

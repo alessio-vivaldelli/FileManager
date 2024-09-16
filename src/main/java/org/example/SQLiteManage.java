@@ -131,18 +131,36 @@ public class SQLiteManage {
         }
     }
 
-    public void removeTagFromFile(String filePath){
-        String insertSQL = "DELETE FROM %s WHERE FilePath = ?;".formatted(SQLiteManage.TAG_TABLE);
+    public void removeTagFromFile(String filePath, int tagID){
+        String insertSQL = "DELETE FROM %s WHERE FilePath = ? AND TagID = ?;".formatted(SQLiteManage.TAG_TABLE);
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
             preparedStatement.setString(1, filePath);
+            preparedStatement.setInt(2, tagID);
             preparedStatement.execute();
         } catch (SQLException e) {
-            System.out.println("Error on insert favourite row:\n" + insertSQL);
+            System.out.println("Error on deleting row:\n" + insertSQL);
             System.out.println(e.getMessage());
         }
     }
 
-
+    public void deleteTag(String tagName){
+        String insertSQL = "DELETE FROM %s WHERE TagName = ?;".formatted(SQLiteManage.TAG_INFO_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setString(1, tagName);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on deleting row:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+        String insertSQL_2 = "DELETE FROM %s WHERE TagID = ?;".formatted(SQLiteManage.TAG_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL_2)) {
+            preparedStatement.setInt(1, Util.getTagIdFromString(tagName));
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on deleting row:\n" + insertSQL_2);
+            System.out.println(e.getMessage());
+        }
+    }
     public boolean checkTableExist(String name) {
         String checkSQL = "SELECT * FROM sqlite_master WHERE type='table' AND name=?;";
         try (PreparedStatement preparedStatement = connection.prepareStatement(checkSQL)) {

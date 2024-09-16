@@ -1,5 +1,6 @@
 package org.example.view;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 import org.example.Icons.CircleIcon;
 import org.example.Layout.MOverlayLayout;
@@ -14,13 +15,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 
 import org.example.Layout.WrapLayout;
+import org.example.Util;
 
 
 public class ExplorerView extends TabPage {
@@ -45,12 +44,15 @@ public class ExplorerView extends TabPage {
     public JPanel disksListBar;
     public JPanel cloudListBar;
     public JPanel insideTagPanel;
+    public JTextField newTagField;
+    public JButton colorButton;
 
     public ExplorerView() {
         super("File Explorer " + count);
         count++;
         initView();
     }
+
 
     private void initView() {
 
@@ -98,15 +100,9 @@ public class ExplorerView extends TabPage {
         fileView_p = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 10));
         fileView_p.setFocusable(true);
 
-//        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Documents")));
-//        fileView_p.add(new MItem(new File("C:\\Users\\aless\\Pictures")));
-//        fileView_p.add(new Item(new File("C:\\Users\\aless\\Music")));
-//        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Telegram Desktop\\photo_2024-08-22_14-29-16.jpg")));
-//        fileView_p.add(new Item(new File("C:\\Users\\aless\\Downloads\\Iscrizione.pdf")));
-
-
 
         JScrollPane fileView = new JScrollPane(fileView_p);
+        fileView.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         fileView.getVerticalScrollBar().setUnitIncrement(20);
         fileView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         fileView.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -191,7 +187,55 @@ public class ExplorerView extends TabPage {
         newTagButton.putClientProperty("FlatLaf.styleClass", "medium");
         newTagButton.putClientProperty("JButton.buttonType", "borderless");
 
-        tagsListBar.add(newTagButton, "growx,pad 0,gapbottom 2,gaptop 15,gapleft 20,gapright 20");
+        newTagField = new JTextField(){
+            @Override
+            protected void paintBorder(Graphics g) {
+            }
+
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+
+                Graphics2D g2d = (Graphics2D) g;
+                float[] dashingPattern1 = {4.5f, 4.5f};
+                Stroke stroke2 = new BasicStroke(1f, BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_MITER, 1.0f, dashingPattern1, 2.0f);
+
+                g2d.setStroke(stroke2);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.drawRoundRect(0,0, (int) (this.getWidth()*0.98f), (int) (this.getHeight()*0.98f), 20,20);
+            }
+        };
+        newTagField.setHorizontalAlignment(SwingConstants.CENTER);
+        colorButton = new JButton();
+        colorButton.setIcon(null);
+        colorButton.setOpaque(false);
+        colorButton.setPreferredSize(new Dimension(16,16));
+        colorButton.addActionListener(e -> {
+            colorButton.setIcon(new CircleIcon(Util.generateNewColor()));
+        });
+        newTagField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, colorButton );
+        newTagField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
+        newTagField.putClientProperty("JTextField.placeholderText", "new tag");
+
+        newTagField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                colorButton.setIcon(new CircleIcon(Util.generateNewColor()));
+                colorButton.setVisible(true);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if(newTagField.getText().isEmpty()) {
+                    colorButton.setIcon(null);
+                }
+            }
+        });
+
+        tagsListBar.add(newTagField, "growx,pad 0,gapbottom 2,gaptop 15,gapleft 20,gapright 20");
+
+//        tagsListBar.add(newTagButton, "growx,pad 0,gapbottom 2,gaptop 15,gapleft 20,gapright 20");
 
         leftPanel.add(tagsListBar, "growx,gapleft 0, gapright 0");
 
@@ -294,6 +338,17 @@ public class ExplorerView extends TabPage {
         return tmp;
     }
 
+    public void removeTagElement(String tagName){
+        int count = insideTagPanel.getComponentCount();
+        for (int i = 0; i < count; i++) {
+            if (((JToggleButton) insideTagPanel.getComponent(i)).getText().equals(tagName)){
+                insideTagPanel.remove(i);
+                insideTagPanel.revalidate();
+                break;
+            }
+        }
+    }
+
     public JToggleButton addTagItem(String name, String color){
         JToggleButton b = new JToggleButton(name){
             @Override
@@ -302,6 +357,7 @@ public class ExplorerView extends TabPage {
                 return super.getPreferredSize();
             }
         };
+
         b.setIcon(new CircleIcon(color));
         b.setHorizontalAlignment(JButton.LEFT);
         b.setFocusable(false);
@@ -338,5 +394,12 @@ public class ExplorerView extends TabPage {
         tmp.putClientProperty("JButton.buttonType", "borderless");
         cloudListBar.add(tmp, ExplorerView.SHORTUCT_ITEM_CONSTRAINS,1);
         return tmp;
+    }
+
+    public JTextField getNewTagText(){
+        return newTagField;
+    }
+    public String getNewTagColor(){
+        return ((CircleIcon) colorButton.getIcon()).getColor();
     }
 }

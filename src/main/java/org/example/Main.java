@@ -22,20 +22,6 @@ import org.example.view.MyTabbedPaneView;
 // Best practices:
 // https://softwareengineering.stackexchange.com/questions/39677/what-are-the-best-practices-of-java-swing-development
 
-// GridBag is powerful but tends to be hardcoded with magic numbers
-// https://docs.oracle.com/javase/tutorial/uiswing/layout/gridbag.html
-
-// GroupLayout is powerful but complex to handle
-// https://docs.oracle.com/javase/tutorial/uiswing/layout/group.html
-
-// Library to have a new layout manager
-// http://miglayout.com/
-
-
-// Codice preso da:
-// https://stackoverflow.com/questions/55768162/observer-pattern-on-mvc-for-specific-fields
-// https://thephantomprogrammer.blogspot.com/2015/08/compound-patterns.html
-
 public class Main {
 
     public static Dimension screenDimension;
@@ -56,6 +42,7 @@ public class Main {
         UIManager.put("Tree.scrollsOnExpand", true);
         UIManager.put("ScrollPane.border", false);
         UIManager.put("Tree.background", Color.TRANSLUCENT);
+        UIManager.put( "TextComponent.arc", 30 );
 
         Util.initDatabaseData();
 
