@@ -16,6 +16,8 @@ import java.util.Map;
 public class ItemModel implements Model {
     final public static String NEW_ITEM = "new_folder_item";
     final public static String REFRESH_TAGS = "tag_list_refresh";
+    final public static String ITEM_SELECTED = "item_selected";
+    final public static String NEW_SELECTION_STATUS = "set_the_selection_status_of_item";
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
 
@@ -29,6 +31,15 @@ public class ItemModel implements Model {
     public ItemModel(File file){
         this.file = file;
         initModel();
+    }
+
+    public void setSelected(boolean newValue){
+
+        propertyChangeSupport.firePropertyChange(ItemModel.NEW_SELECTION_STATUS, null, newValue);
+    }
+
+    public void itemSelected(boolean isControlDown){
+        propertyChangeSupport.firePropertyChange(ItemModel.ITEM_SELECTED, isControlDown, this);
     }
 
     public void subscribeToModel(Model e){
@@ -60,7 +71,7 @@ public class ItemModel implements Model {
         if(favourite){
             Util.addFavourite("", file.getPath());
         }else {
-            Util.removeFavourite("", file.getPath());
+            Util.removeFavourite(file.getPath());
         }
     }
 
@@ -74,10 +85,6 @@ public class ItemModel implements Model {
 
     public File getFile(){return this.file;}
 
-    public void newTag(TagView tag){
-//        itemTags.add(tag);
-        return;
-    }
 
     public void newTagSelected(String name){
         Util.newFileTag(name, file.getPath());

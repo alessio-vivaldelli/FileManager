@@ -176,9 +176,10 @@ public final class Util {
         sql.closeConnection();
     }
 
-    public static void removeFavourite(String displayName, String filePath){
+    public static void removeFavourite(String filePath){
         SQLiteManage sql = new SQLiteManage();
         sql.removeFromFavouriteTable(filePath, false);
+        favouriteFiles.remove(new File(filePath));
         sql.closeConnection();
     }
 
@@ -188,11 +189,13 @@ public final class Util {
 
         List<Integer> tmp = filesTagMap.get(filePath);
         tmp.remove(tmp.indexOf(getTagIdFromString(tag)));
-        filesTagMap.put(filePath, tmp);
+        if(tmp.isEmpty()){filesTagMap.remove(filePath);}
+        else {filesTagMap.put(filePath, tmp);}
 
         List<String> tmp2 = tagIdPathMap.get(getTagIdFromString(tag));
-        tmp2.remove(tag);
-        tagIdPathMap.put(getTagIdFromString(tag), tmp2);
+        tmp2.remove(filePath);
+        if(tmp2.isEmpty()){tagIdPathMap.remove(getTagIdFromString(tag));}
+        else {tagIdPathMap.put(getTagIdFromString(tag), tmp2);}
 
         sql.closeConnection();
     }

@@ -37,6 +37,8 @@ public class ExplorerController {
     private boolean isLoadingFolder = false;
     private List<String> selectedTags;
 
+    private Rectangle draggingRectangle;
+
     public ExplorerController(ExplorerView view, ExplorerModel model){
         this.view = view;
         this.model = model;
@@ -48,6 +50,8 @@ public class ExplorerController {
     }
 
     private void initController() {
+
+        draggingRectangle = null;
 
         leftShortcut = view.getShortcutTabs();
         leftShortcut.addMouseListener(new MouseListener() {
@@ -79,6 +83,10 @@ public class ExplorerController {
         model.addPropertyChangeListener(ExplorerModel.NEW_SHORTCUT, this::newShortcutTab);
         model.addPropertyChangeListener(ExplorerModel.TREE_INIT, this::treeInitialized);
         model.addPropertyChangeListener(ExplorerModel.NEW_ITEM, this::newItem);
+        model.addPropertyChangeListener(ExplorerModel.SELECTION_UPDATE, this::selectionListUpdate);
+        model.addPropertyChangeListener(ExplorerModel.REMOVE_ALL_SELECTION, this::clearSelection);
+        model.addPropertyChangeListener(ExplorerModel.DESELCT_ITEM, this::deselectItem);
+
 
         tree = view.getTree();
         DefaultMutableTreeNode root = model.createTree(new File("This Computer"));
@@ -92,33 +100,11 @@ public class ExplorerController {
 
         tree.addTreeSelectionListener(this::treeSelectionChange);
 
-        view.fileView_p.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                System.out.println("CNDUSAIFLH");
-                view.fileView_p.requestFocusInWindow();
-            }
+        MouseHandlerClass handlerClass = new MouseHandlerClass();
 
-            @Override
-            public void mousePressed(MouseEvent e) {
+        view.fileView_p.addMouseMotionListener(handlerClass);
+        view.fileView_p.addMouseListener(handlerClass);
 
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        });
         view.fileView_p.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -186,6 +172,27 @@ public class ExplorerController {
         });
     }
 
+    private void deselectItem(PropertyChangeEvent e){
+        ((ItemModel) e.getNewValue()).setSelected(false);
+    }
+
+    private void clearSelection(PropertyChangeEvent e){
+        List<ItemModel> l = (List<ItemModel>) e.getNewValue();
+        l.forEach(elem -> {
+            elem.setSelected(false);
+        });
+    }
+
+    // TODO: put on screen the number of selected items
+    private void selectionListUpdate(PropertyChangeEvent e){
+        List<ItemModel> list = (List<ItemModel>) e.getNewValue();
+        if(list != null){
+            list.forEach(elem -> {
+                elem.setSelected(true);
+            });
+        }
+    }
+
     private void newTagConfirmed(ActionEvent e){
         JTextField field = ((JTextField)e.getSource());
         String newTag = field.getText();
@@ -195,47 +202,58 @@ public class ExplorerController {
         field.setFocusable(false); field.setFocusable(true);
 
 
-        view.addTagItem(newTag, view.getNewTagColor());
         model.newTag(newTag, view.getNewTagColor());
+        newTag(newTag, view.getNewTagColor());
     }
 
-    // TODO: handle multiple tag selection
     private void refreshTagsList(){
+
         for (Map.Entry<String, String> elem : Util.getTagsColorMap().entrySet()){
-            JToggleButton tmp = view.addTagItem(elem.getKey(), elem.getValue());
-            tmp.addActionListener(this::tagFilterChanges);
-            tmp.addMouseListener(new MouseListener() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if(SwingUtilities.isRightMouseButton(e)){
-
-                    }else if(SwingUtilities.isMiddleMouseButton(e)){
-                        view.removeTagElement(elem.getKey());
-                        model.deleteTag(elem.getKey());
-                    }
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-
-                }
-            });
+            newTag(elem.getKey(), elem.getValue());
         }
+    }
+
+    /**
+     * Add tag to left panel with filtering feature by clicking it.
+     * Object will be added with mouse listener implemented, on 3rd mouse button
+     * tag will be deleted
+     * @param tagName tag name
+     * @param tagColor tag color
+     */
+    private void newTag(String tagName, String tagColor){
+        JToggleButton tmp = view.addTagItem(tagName, tagColor);
+        tmp.addActionListener(this::tagFilterChanges);
+        tmp.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(SwingUtilities.isRightMouseButton(e)){
+
+                }else if(SwingUtilities.isMiddleMouseButton(e)){
+                    view.removeTagElement(tagName);
+                    model.deleteTag(tagName);
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
     }
 
     private void tagFilterChanges(ActionEvent e){
@@ -248,10 +266,18 @@ public class ExplorerController {
         showFilesList(Util.getFilesFromTags(selectedTags));
     }
 
+    private void showFavourites(ActionEvent e){
+        showFilesList(Util.getFavouritesData());
+    }
+
+
     private void refreshShortcutList(){
         Util.getShortcutData().forEach((elem) -> {
             JButton tmp = view.addShortcutItem(elem);
-            tmp.addActionListener(this::handleLeftPanelClicks);
+            if(elem.getName().equals("Favourite")){tmp.addActionListener(this::showFavourites);}
+            else {
+                tmp.addActionListener(this::handleLeftPanelClicks);
+            }
         });
     }
 
@@ -323,9 +349,7 @@ public class ExplorerController {
                 for (File a : Arrays.stream(f.listFiles()).sorted(new ExplorerModel.CompareItems()).toList())
                 {
                     if(a == null){continue;}
-                    MItem newItem = new MItem(a);
-                    newItem.getModel().subscribeToModel(model);
-                    addItemListener(newItem);
+                    MItem newItem = createMItem(a);
                     publish(newItem);
                 }
                 return null;
@@ -366,9 +390,7 @@ public class ExplorerController {
                 for (File a : files)
                 {
                     if(a == null){continue;}
-                    MItem newItem = new MItem(a);
-                    newItem.getModel().subscribeToModel(model);
-                    addItemListener(newItem);
+                    MItem newItem = createMItem(a);
                     publish(newItem);
                 }
                 return null;
@@ -391,8 +413,95 @@ public class ExplorerController {
         worker.execute();
     }
 
-    private void addItemListener(MItem item){
-        item.getModel().addPropertyChangeListener(ItemModel.NEW_ITEM, this::newItem);
+    private MItem createMItem(File f){
+        MItem newItem = new MItem(f);
+        newItem.getModel().subscribeToModel(model);
+        addItemListener(newItem);
+        return newItem;
     }
 
+    private void addItemListener(MItem item){
+        item.getModel().addPropertyChangeListener(ItemModel.NEW_ITEM, this::newItem);
+        item.getModel().addPropertyChangeListener(ItemModel.ITEM_SELECTED, this::newSelection);
+    }
+
+    private void newSelection(PropertyChangeEvent e){
+        boolean isControlDown = (boolean) e.getOldValue();
+        ItemModel fileModel = (ItemModel) e.getNewValue();
+        model.newSelection(fileModel, isControlDown);
+    }
+
+    public class MouseHandlerClass implements MouseMotionListener, MouseListener {
+        public boolean isDragging = false;
+        public Point startingPoint;
+
+        private boolean isOut = false;
+
+        public MouseHandlerClass(){}
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if(!isDragging && !isOut){
+                startingPoint = e.getPoint();
+                isDragging = true;
+//                view.drawRectangle(new Rectangle(startingPoint.x, startingPoint.y, e.getPoint().x, e.getPoint().y));
+            }
+            else if(!isOut) {
+                int x, y, width, height;
+                x = startingPoint.x;
+                y = startingPoint.y;
+                width = e.getPoint().x - startingPoint.x;
+                height = e.getPoint().y - startingPoint.y;
+                if(width < 0 && height  > 0){
+                    width = Math.abs(width);
+                    x = startingPoint.x-width;
+                }else if(width < 0 && height < 0){
+                    height = Math.abs(height);
+                    y = startingPoint.y-height;
+                    width = Math.abs(width);
+                    x = startingPoint.x-width;
+                }else if(width > 0 && height  < 0){
+                    height = Math.abs(height);
+                    y = startingPoint.y-height;
+                }
+                Rectangle drawRec = new Rectangle(x,y,width,height);
+                view.drawRectangle(drawRec);
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            view.fileView_p.requestFocusInWindow();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if(isDragging){
+                isDragging = false;
+                view.stopDawRectangle();
+            }
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            isOut = false;
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+//            isDragging = false;
+//            isOut = true;
+//            view.stopDawRectangle();
+        }
+    }
 }

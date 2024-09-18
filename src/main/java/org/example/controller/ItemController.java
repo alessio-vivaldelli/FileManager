@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.Arrays;
@@ -24,6 +25,7 @@ public class ItemController {
     private Item view;
     private ItemModel model;
     private JButton starButton;
+    private JButton mainButton;
 
     public ItemController(Item view, ItemModel model){
         this.view = view;
@@ -33,52 +35,27 @@ public class ItemController {
 
     private void initController() {
 
-        JButton mainButton = view.getItemButton();
-        mainButton.addActionListener(event -> {
-//            mainButton.setSelected(true);
-        });
+        mainButton = view.getItemButton();
 
-        mainButton.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-                    if (view.file.isDirectory()){
-//                        openFolder();
-                        model.lastOpenedFolder(view.file);
-                    }
-                }
-            }
-            @Override
-            public void mousePressed(MouseEvent e) {
 
-            }
+        MouseHandlerClass mouseHandler = new MouseHandlerClass();
+        mainButton.addMouseListener(mouseHandler);
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        });
         starButton = view.getStarButton();
         starButton.addActionListener(this::starClicked);
 
         model.addPropertyChangeListener(ItemModel.REFRESH_TAGS, this::tagsRefreshed);
+        model.addPropertyChangeListener(ItemModel.NEW_SELECTION_STATUS, this::setSeletionStatus);
         model.addPropertyChangeListener(ExplorerModel.TAG_DELETED, this::tagDeleted);
 
         setStarStatus(model.isFavourite());
 
-
         setTagsMenu();
         model.refreshTags();
+    }
+
+    private void setSeletionStatus(PropertyChangeEvent e){
+        mainButton.setSelected((boolean) e.getNewValue());
     }
 
     private void tagDeleted(PropertyChangeEvent e){
@@ -128,6 +105,7 @@ public class ItemController {
     private void starClicked(ActionEvent e){
         ((StarIcon) starButton.getIcon()).toggleStar();
         model.setFavourite(!model.isFavourite());
+
     }
 
     private void setStarStatus(boolean status){
@@ -172,6 +150,51 @@ public class ItemController {
         };
         worker.execute();
     }
+
+    public class MouseHandlerClass implements MouseMotionListener, MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                if (view.file.isDirectory()){
+                    model.lastOpenedFolder(view.file);
+                }
+            }else {
+                model.itemSelected(e.isControlDown());
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
+        }
+    }
+
 
 }
 

@@ -43,14 +43,6 @@ public class Item extends JPanel {
         lp.setBounds(0, 0, Item.getItemOuterPreferredSize().width, Item.getItemOuterPreferredSize().height);
 
         popupMenu = new JPopupMenu();
-//        JCheckBoxMenuItem m1 = new JCheckBoxMenuItem("Tag1");
-//        JCheckBoxMenuItem m2 = new JCheckBoxMenuItem("Tag2");
-//        JCheckBoxMenuItem m3 = new JCheckBoxMenuItem("Tag3");
-//        popupMenu.addSeparator();
-//        newTagButton = new JMenuItem("New Tag");
-//        popupMenu.add(newTagButton);
-//
-//        popupMenu.add(m1); popupMenu.add(m2); popupMenu.add(m3); popupMenu.addSeparator(); popupMenu.add(newTagButton);
 
         JLabel label = new JLabel();
         final int labelIconSize = Item.getIconSize();
@@ -104,7 +96,8 @@ public class Item extends JPanel {
 
         button = new JButton();
         button.putClientProperty("JButton.buttonType", "borderless");
-        button.setBounds(0, 0, Item.getItemOuterPreferredSize().width, Item.getItemOuterPreferredSize().height);;
+        button.setBounds(0, 0, Item.getItemOuterPreferredSize().width, Item.getItemOuterPreferredSize().height);
+        button.setFocusable(false);
 
         tagMenuButton = new JButton();
         tagMenuButton.setIcon(new TagIcon(18));

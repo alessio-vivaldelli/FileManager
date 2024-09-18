@@ -47,12 +47,23 @@ public class ExplorerView extends TabPage {
     public JTextField newTagField;
     public JButton colorButton;
 
+    private Rectangle draggingRectangle = null;
+    private static final Color draggingRectangleColor = new Color(0,0.39f,0.56f, 0.3f);
+
     public ExplorerView() {
         super("File Explorer " + count);
         count++;
         initView();
     }
 
+    public void drawRectangle(Rectangle newRectangle){
+        draggingRectangle = newRectangle;
+        fileView_p.repaint();
+    }
+    public void stopDawRectangle(){
+        draggingRectangle = null;
+        fileView_p.repaint();
+    }
 
     private void initView() {
 
@@ -97,7 +108,16 @@ public class ExplorerView extends TabPage {
         innerPanel.add(shortcutTabs, BorderLayout.WEST);
         innerPanel.add(center, BorderLayout.CENTER);
 
-        fileView_p = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 10));
+        fileView_p = new JPanel(new WrapLayout(FlowLayout.LEFT, 10, 10)){
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                if(draggingRectangle != null){
+                    g.setColor(ExplorerView.draggingRectangleColor);
+                    g.fillRoundRect(draggingRectangle.x, draggingRectangle.y, draggingRectangle.width, draggingRectangle.height, 10, 10);
+                }
+            }
+        };
         fileView_p.setFocusable(true);
 
 

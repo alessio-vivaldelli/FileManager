@@ -18,23 +18,39 @@ public class ExplorerModel implements Model {
     final public static String TREE_INIT = "tree_initialized";
     final public static String NEW_ITEM = "new_folder_item";
     final public static String TAG_DELETED = "tag_deleted_from_explorer";
+    final public static String SELECTION_UPDATE = "selection_list_updated";
+    final public static String DESELCT_ITEM = "remove_item_selection";
+    final public static String REMOVE_ALL_SELECTION = "clear_selection_list";
 
-
-
+    private List<ItemModel> selectedItems;
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
-    private List<String> shorcutList;
-    private List<String> tagList;
-
     private File openedFolder;
 
-    private static final String windowsTopName = "This PC";
 
     public ExplorerModel(){
-        shorcutList = new ArrayList<>();
         openedFolder = null;
+        selectedItems = new ArrayList<>();
     }
 
     public void initModel() {
+
+    }
+
+    public void newSelection(ItemModel model , boolean isControlDown){
+        if(isControlDown){
+            if(selectedItems.contains(model)){
+                selectedItems.remove(model);
+                propertyChangeSupport.firePropertyChange(ExplorerModel.DESELCT_ITEM, null, model);
+            }
+            else{ selectedItems.add(model);}
+            propertyChangeSupport.firePropertyChange(ExplorerModel.SELECTION_UPDATE, null, selectedItems);
+        }
+        else{
+            propertyChangeSupport.firePropertyChange(ExplorerModel.REMOVE_ALL_SELECTION, null, selectedItems);
+            selectedItems = new ArrayList<>();
+            selectedItems.add(model);
+            propertyChangeSupport.firePropertyChange(ExplorerModel.SELECTION_UPDATE, null, selectedItems);
+        }
 
     }
 
@@ -47,7 +63,6 @@ public class ExplorerModel implements Model {
         Util.newTag(tagName, tagColor);
     }
 
-    // TODO: update listeners like MItem witch has to update popup menu
     public void deleteTag(String tagName){
         Util.deleteTag(tagName);
         propertyChangeSupport.firePropertyChange(ExplorerModel.TAG_DELETED, null, tagName);
