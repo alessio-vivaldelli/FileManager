@@ -1,12 +1,12 @@
 package org.example.model;
 
 import org.example.MItem;
-import org.example.ShortcutItem;
 import org.example.Util;
 
 import javax.swing.*;
 import javax.swing.event.SwingPropertyChangeSupport;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.*;
@@ -19,8 +19,10 @@ public class ExplorerModel implements Model {
     final public static String NEW_ITEM = "new_folder_item";
     final public static String TAG_DELETED = "tag_deleted_from_explorer";
     final public static String SELECTION_UPDATE = "selection_list_updated";
-    final public static String DESELCT_ITEM = "remove_item_selection";
+    final public static String DESELECT_ITEM = "remove_item_selection";
     final public static String REMOVE_ALL_SELECTION = "clear_selection_list";
+    final public static String DRAGGING_SELECTION_ACTION = "dragging_selection_action_detected";
+
 
     private List<ItemModel> selectedItems;
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
@@ -36,11 +38,26 @@ public class ExplorerModel implements Model {
 
     }
 
+    public void draggingSelectionRectangle(Rectangle selection){
+        propertyChangeSupport.firePropertyChange(ExplorerModel.DRAGGING_SELECTION_ACTION, null, selection);
+
+    }
+
+    public void setItemSelected(boolean itemSelected, ItemModel itemModel){
+        if(itemSelected && !(selectedItems.contains(itemModel))){
+            selectedItems.add(itemModel);
+            propertyChangeSupport.firePropertyChange(ExplorerModel.SELECTION_UPDATE, null, selectedItems);
+        }else if(selectedItems.contains(itemModel) && !itemSelected){
+            selectedItems.remove(itemModel);
+            propertyChangeSupport.firePropertyChange(ExplorerModel.DESELECT_ITEM, null, itemModel);
+        }
+    }
+
     public void newSelection(ItemModel model , boolean isControlDown){
         if(isControlDown){
             if(selectedItems.contains(model)){
                 selectedItems.remove(model);
-                propertyChangeSupport.firePropertyChange(ExplorerModel.DESELCT_ITEM, null, model);
+                propertyChangeSupport.firePropertyChange(ExplorerModel.DESELECT_ITEM, null, model);
             }
             else{ selectedItems.add(model);}
             propertyChangeSupport.firePropertyChange(ExplorerModel.SELECTION_UPDATE, null, selectedItems);
@@ -52,6 +69,11 @@ public class ExplorerModel implements Model {
             propertyChangeSupport.firePropertyChange(ExplorerModel.SELECTION_UPDATE, null, selectedItems);
         }
 
+    }
+
+    public void clearSelection(){
+        propertyChangeSupport.firePropertyChange(ExplorerModel.REMOVE_ALL_SELECTION, null, selectedItems);
+        selectedItems = new ArrayList<>();
     }
 
     public boolean isTagDuplicated(String tagName){

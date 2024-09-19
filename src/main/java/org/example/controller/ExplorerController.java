@@ -9,7 +9,6 @@ import org.example.model.ExplorerModel;
 import org.example.view.ExplorerView;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -24,7 +23,10 @@ import java.util.Map;
 
 import com.formdev.flatlaf.extras.*;
 
-
+/**
+ * Controller class for the Explorer view.
+ * Manages interactions between the ExplorerView and ExplorerModel.
+ */
 public class ExplorerController {
 
     ExplorerView view;
@@ -39,6 +41,13 @@ public class ExplorerController {
 
     private Rectangle draggingRectangle;
 
+    /**
+     * Constructor for ExplorerController.
+     * Initializes the view and model, and sets up the controller.
+     *
+     * @param view  the ExplorerView instance
+     * @param model the ExplorerModel instance
+     */
     public ExplorerController(ExplorerView view, ExplorerModel model){
         this.view = view;
         this.model = model;
@@ -49,6 +58,9 @@ public class ExplorerController {
         model.initModel();
     }
 
+    /**
+     * Initializes the controller by setting up event listeners and refreshing lists.
+     */
     private void initController() {
 
         draggingRectangle = null;
@@ -83,9 +95,10 @@ public class ExplorerController {
         model.addPropertyChangeListener(ExplorerModel.NEW_SHORTCUT, this::newShortcutTab);
         model.addPropertyChangeListener(ExplorerModel.TREE_INIT, this::treeInitialized);
         model.addPropertyChangeListener(ExplorerModel.NEW_ITEM, this::newItem);
+
         model.addPropertyChangeListener(ExplorerModel.SELECTION_UPDATE, this::selectionListUpdate);
         model.addPropertyChangeListener(ExplorerModel.REMOVE_ALL_SELECTION, this::clearSelection);
-        model.addPropertyChangeListener(ExplorerModel.DESELCT_ITEM, this::deselectItem);
+        model.addPropertyChangeListener(ExplorerModel.DESELECT_ITEM, this::deselectItem);
 
 
         tree = view.getTree();
@@ -104,44 +117,8 @@ public class ExplorerController {
 
         view.fileView_p.addMouseMotionListener(handlerClass);
         view.fileView_p.addMouseListener(handlerClass);
-
-        view.fileView_p.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                System.out.println("Focus IN");
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                System.out.println("Focus OUT");
-
-            }
-        });
-        view.fileView_p.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-
-                if((e.getKeyChar() < 'a' || e.getKeyChar() > 'z') &&
-                        (e.getKeyChar() < 'A' || e.getKeyChar() > 'Z') &&
-                        (e.getKeyChar() < '0' || e.getKeyChar() > '9')){
-                    return;
-                }
-
-                boolean res = filterItemsByText(view.searchText.getText().toLowerCase() + e.getKeyChar());
-                view.searchText.exist(res);
-                view.searchText.addChar(e.getKeyChar());
-            }
-
-            @Override
-            public void keyPressed(KeyEvent e) {
-
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-
-            }
-        });
+        view.fileView_p.addFocusListener(handlerClass);
+        view.fileView_p.addKeyListener(handlerClass);
 
         refreshTagsList();
         refreshShortcutList();
@@ -172,10 +149,20 @@ public class ExplorerController {
         });
     }
 
+    /**
+     * Deselects an item.
+     *
+     * @param e the PropertyChangeEvent containing the item to deselect
+     */
     private void deselectItem(PropertyChangeEvent e){
         ((ItemModel) e.getNewValue()).setSelected(false);
     }
 
+    /**
+     * Clears the selection of items.
+     *
+     * @param e the PropertyChangeEvent containing the list of items to clear selection
+     */
     private void clearSelection(PropertyChangeEvent e){
         List<ItemModel> l = (List<ItemModel>) e.getNewValue();
         l.forEach(elem -> {
@@ -184,6 +171,11 @@ public class ExplorerController {
     }
 
     // TODO: put on screen the number of selected items
+    /**
+     * Updates the selection list.
+     *
+     * @param e the PropertyChangeEvent containing the list of selected items
+     */
     private void selectionListUpdate(PropertyChangeEvent e){
         List<ItemModel> list = (List<ItemModel>) e.getNewValue();
         if(list != null){
@@ -193,6 +185,11 @@ public class ExplorerController {
         }
     }
 
+    /**
+     * Confirms the creation of a new tag.
+     *
+     * @param e the ActionEvent triggered by the new tag text field
+     */
     private void newTagConfirmed(ActionEvent e){
         JTextField field = ((JTextField)e.getSource());
         String newTag = field.getText();
@@ -206,6 +203,9 @@ public class ExplorerController {
         newTag(newTag, view.getNewTagColor());
     }
 
+    /**
+     * Refreshes the list of tags.
+     */
     private void refreshTagsList(){
 
         for (Map.Entry<String, String> elem : Util.getTagsColorMap().entrySet()){
@@ -256,6 +256,11 @@ public class ExplorerController {
         });
     }
 
+    /**
+     * Handles changes in tag filters.
+     *
+     * @param e the ActionEvent triggered by the tag filter change
+     */
     private void tagFilterChanges(ActionEvent e){
         JToggleButton source = (JToggleButton) e.getSource();
         if(source.isSelected()){
@@ -266,11 +271,18 @@ public class ExplorerController {
         showFilesList(Util.getFilesFromTags(selectedTags));
     }
 
+    /**
+     * Shows the list of favorite files.
+     *
+     * @param e the ActionEvent triggered by the favorites button
+     */
     private void showFavourites(ActionEvent e){
         showFilesList(Util.getFavouritesData());
     }
 
-
+    /**
+     * Refreshes the list of shortcuts.
+     */
     private void refreshShortcutList(){
         Util.getShortcutData().forEach((elem) -> {
             JButton tmp = view.addShortcutItem(elem);
@@ -281,6 +293,9 @@ public class ExplorerController {
         });
     }
 
+    /**
+     * Refreshes the list of disks.
+     */
     private void refreshDisksList(){
         for(File file : File.listRoots()){
             JButton tmp = view.addDiskItem(file);
@@ -288,6 +303,9 @@ public class ExplorerController {
         }
     }
 
+    /**
+     * Refreshes the list of cloud paths.
+     */
     private void refreshCloudList(){
         for(String file : CloudPathFinder.getCloudPaths()){
             JButton tmp = view.addCloudItem(new File(file));
@@ -295,6 +313,11 @@ public class ExplorerController {
         }
     }
 
+    /**
+     * Handles clicks on the left panel.
+     *
+     * @param e the ActionEvent triggered by the left panel click
+     */
     private void handleLeftPanelClicks(ActionEvent e){
         String path = e.getSource().toString();
         if(path.equals("Favourite")){return;}
@@ -304,17 +327,32 @@ public class ExplorerController {
         showFolder(f);
     }
 
+    /**
+     * Filters items by text.
+     *
+     * @param filterText the text to filter items by
+     * @return true if items are found, false otherwise
+     */
     private boolean filterItemsByText(String filterText){
         List<MItem> res = itemList.stream().filter(item -> item.toString().toLowerCase().startsWith(filterText)).toList();
         System.out.println(res);
         return !res.isEmpty();
     }
 
-
+    /**
+     * Handles the creation of a new item.
+     *
+     * @param e the PropertyChangeEvent containing the new item
+     */
     private void newItem(PropertyChangeEvent e){
         showFolder((File) e.getNewValue());
     }
 
+    /**
+     * Handles the creation of a new shortcut tab.
+     *
+     * @param e the PropertyChangeEvent containing the new shortcut item
+     */
     private void newShortcutTab(PropertyChangeEvent e){
         ShortcutItem item = (ShortcutItem) e.getNewValue();
 
@@ -322,17 +360,32 @@ public class ExplorerController {
         leftShortcut.addTab(item.name, new FlatSVGIcon( "icons/docs.svg", ExplorerView.ICON_SIZE, ExplorerView.ICON_SIZE ), item);
     }
 
+    /**
+     * Handles the initialization of the tree.
+     *
+     * @param e the PropertyChangeEvent containing the new tree root
+     */
     private void treeInitialized(PropertyChangeEvent e){
         DefaultTreeModel s = new DefaultTreeModel((DefaultMutableTreeNode) e.getNewValue());
         view.getTree().setModel(s);
     }
 
+    /**
+     * Handles changes in tree selection.
+     *
+     * @param e the TreeSelectionEvent triggered by the tree selection change
+     */
     private void treeSelectionChange(TreeSelectionEvent e){
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) ((JTree) e.getSource()).getLastSelectedPathComponent();
         File f = (File) (node.getUserObject());
         showFolder(f);
     }
 
+    /**
+     * Shows the contents of a folder.
+     *
+     * @param f the folder to show
+     */
     private void showFolder(File f){
         if(f == null){return;}
         model.setOpenedFolder(f);
@@ -372,6 +425,11 @@ public class ExplorerController {
         worker.execute();
     }
 
+    /**
+     * Shows the list of files.
+     *
+     * @param files the list of files to show
+     */
     private void showFilesList(List<File> files){
 
         model.setOpenedFolder(null);
@@ -413,6 +471,12 @@ public class ExplorerController {
         worker.execute();
     }
 
+    /**
+     * Creates a new MItem for a given file.
+     *
+     * @param f the file to create an MItem for
+     * @return the created MItem
+     */
     private MItem createMItem(File f){
         MItem newItem = new MItem(f);
         newItem.getModel().subscribeToModel(model);
@@ -420,18 +484,46 @@ public class ExplorerController {
         return newItem;
     }
 
+    /**
+     * Adds listeners to an MItem.
+     *
+     * @param item the MItem to add listeners to
+     */
     private void addItemListener(MItem item){
         item.getModel().addPropertyChangeListener(ItemModel.NEW_ITEM, this::newItem);
         item.getModel().addPropertyChangeListener(ItemModel.ITEM_SELECTED, this::newSelection);
     }
 
+    /**
+     * Handles new item selection.
+     *
+     * @param e the PropertyChangeEvent containing the new selection
+     */
     private void newSelection(PropertyChangeEvent e){
         boolean isControlDown = (boolean) e.getOldValue();
         ItemModel fileModel = (ItemModel) e.getNewValue();
         model.newSelection(fileModel, isControlDown);
     }
 
-    public class MouseHandlerClass implements MouseMotionListener, MouseListener {
+    private void checkOverlapInDragSelection(Rectangle selectionRect){
+        for (int i = 0; i < view.fileView_p.getComponentCount(); i++) {
+            MItem item = (MItem) view.fileView_p.getComponent(i);
+            Rectangle itemRec = new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight());
+            if(rectOverlap(selectionRect, itemRec)){
+                model.setItemSelected(true,(ItemModel) item.getModel());
+            }else {model.setItemSelected(false, (ItemModel) item.getModel());}
+        }
+    }
+
+    private static boolean rectOverlap(Rectangle z, Rectangle r){
+        return z.x < r.x + r.width && z.x + z.width > r.x &&
+                z.y < r.y + r.height && z.y + z.height > r.y;
+    }
+
+    /**
+     * Inner class to handle mouse events.
+     */
+    public class MouseHandlerClass implements MouseMotionListener, MouseListener, FocusListener, KeyListener {
         public boolean isDragging = false;
         public Point startingPoint;
 
@@ -444,7 +536,7 @@ public class ExplorerController {
             if(!isDragging && !isOut){
                 startingPoint = e.getPoint();
                 isDragging = true;
-//                view.drawRectangle(new Rectangle(startingPoint.x, startingPoint.y, e.getPoint().x, e.getPoint().y));
+                model.clearSelection(); // clear file selection before when dragging is detected
             }
             else if(!isOut) {
                 int x, y, width, height;
@@ -466,6 +558,8 @@ public class ExplorerController {
                 }
                 Rectangle drawRec = new Rectangle(x,y,width,height);
                 view.drawRectangle(drawRec);
+
+                checkOverlapInDragSelection(drawRec);
             }
         }
 
@@ -476,12 +570,13 @@ public class ExplorerController {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            view.fileView_p.requestFocusInWindow();
+
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
-
+            view.fileView_p.requestFocusInWindow();
+            model.clearSelection();
         }
 
         @Override
@@ -499,9 +594,41 @@ public class ExplorerController {
 
         @Override
         public void mouseExited(MouseEvent e) {
-//            isDragging = false;
-//            isOut = true;
-//            view.stopDawRectangle();
+        }
+
+        @Override
+        public void focusGained(FocusEvent e) {
+
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            model.clearSelection();
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            if((e.getKeyChar() < 'a' || e.getKeyChar() > 'z') &&
+                    (e.getKeyChar() < 'A' || e.getKeyChar() > 'Z') &&
+                    (e.getKeyChar() < '0' || e.getKeyChar() > '9')){
+                return;
+            }
+
+            boolean res = filterItemsByText(view.searchText.getText().toLowerCase() + e.getKeyChar());
+            view.searchText.exist(res);
+            view.searchText.addChar(e.getKeyChar());
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
         }
     }
+
+
 }

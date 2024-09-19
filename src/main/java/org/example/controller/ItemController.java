@@ -2,14 +2,11 @@ package org.example.controller;
 
 import org.example.Icons.StarIcon;
 import org.example.MItem;
-import org.example.Util;
 import org.example.model.ExplorerModel;
 import org.example.model.ItemModel;
 import org.example.view.Item;
-import org.example.view.TagView;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
@@ -40,12 +37,14 @@ public class ItemController {
 
         MouseHandlerClass mouseHandler = new MouseHandlerClass();
         mainButton.addMouseListener(mouseHandler);
+        mainButton.addMouseMotionListener(mouseHandler);
 
         starButton = view.getStarButton();
         starButton.addActionListener(this::starClicked);
 
         model.addPropertyChangeListener(ItemModel.REFRESH_TAGS, this::tagsRefreshed);
-        model.addPropertyChangeListener(ItemModel.NEW_SELECTION_STATUS, this::setSeletionStatus);
+        model.addPropertyChangeListener(ItemModel.NEW_SELECTION_STATUS, this::setSelectionStatus);
+        model.addPropertyChangeListener(ExplorerModel.TAG_DELETED, this::tagDeleted);
         model.addPropertyChangeListener(ExplorerModel.TAG_DELETED, this::tagDeleted);
 
         setStarStatus(model.isFavourite());
@@ -54,7 +53,8 @@ public class ItemController {
         model.refreshTags();
     }
 
-    private void setSeletionStatus(PropertyChangeEvent e){
+
+    private void setSelectionStatus(PropertyChangeEvent e){
         mainButton.setSelected((boolean) e.getNewValue());
     }
 
@@ -159,14 +159,15 @@ public class ItemController {
                 if (view.file.isDirectory()){
                     model.lastOpenedFolder(view.file);
                 }
-            }else {
-                model.itemSelected(e.isControlDown());
             }
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
-
+            // selection logic in mousePressed is efficient than mouseClick
+            if(SwingUtilities.isLeftMouseButton(e)) {
+                model.itemSelected(e.isControlDown());
+            }
         }
 
         @Override
@@ -186,7 +187,7 @@ public class ItemController {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-
+            System.out.println("Dragging detected");
         }
 
         @Override
@@ -194,7 +195,6 @@ public class ItemController {
 
         }
     }
-
 
 }
 

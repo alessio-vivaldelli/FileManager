@@ -6,6 +6,7 @@ import org.example.view.Item;
 import org.example.view.TagView;
 
 import javax.swing.event.SwingPropertyChangeSupport;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -34,7 +35,6 @@ public class ItemModel implements Model {
     }
 
     public void setSelected(boolean newValue){
-
         propertyChangeSupport.firePropertyChange(ItemModel.NEW_SELECTION_STATUS, null, newValue);
     }
 
@@ -44,6 +44,7 @@ public class ItemModel implements Model {
 
     public void subscribeToModel(Model e){
         e.addPropertyChangeListener(ExplorerModel.TAG_DELETED, this::tagDeleted);
+        e.addPropertyChangeListener(ExplorerModel.DRAGGING_SELECTION_ACTION, this::draggingSelectionDetected);
     }
 
     private void tagDeleted(PropertyChangeEvent e){
@@ -60,6 +61,11 @@ public class ItemModel implements Model {
             // TODO: bohhhhhh
             System.out.println(" ");
         }
+    }
+
+    private void draggingSelectionDetected(PropertyChangeEvent e){
+        Rectangle selectionRectangle = (Rectangle) e.getNewValue();
+        propertyChangeSupport.firePropertyChange(ExplorerModel.DRAGGING_SELECTION_ACTION, null, selectionRectangle);
     }
 
     private void getAllTags(){
