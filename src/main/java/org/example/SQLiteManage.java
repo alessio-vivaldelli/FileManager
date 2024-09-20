@@ -154,7 +154,7 @@ public class SQLiteManage {
         }
         String insertSQL_2 = "DELETE FROM %s WHERE TagID = ?;".formatted(SQLiteManage.TAG_TABLE);
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL_2)) {
-            preparedStatement.setInt(1, Util.getTagIdFromString(tagName));
+            preparedStatement.setInt(1, DatabasesUtil.getTagIdFromString(tagName));
             preparedStatement.execute();
         } catch (SQLException e) {
             System.out.println("Error on deleting row:\n" + insertSQL_2);

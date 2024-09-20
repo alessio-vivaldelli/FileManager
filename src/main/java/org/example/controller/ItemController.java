@@ -225,6 +225,10 @@ public class ItemController {
 
                 initDrag = null;
                 initDistance = 0;
+
+                // notify ExplorerController that dragging is finished
+                // used for drag and drop actions
+                model.dragFinish(e.getLocationOnScreen());
             }
         }
 

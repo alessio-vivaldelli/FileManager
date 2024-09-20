@@ -1,6 +1,6 @@
 package org.example.model;
 
-import org.example.Util;
+import org.example.DatabasesUtil;
 
 import javax.swing.*;
 import javax.swing.event.SwingPropertyChangeSupport;
@@ -18,6 +18,8 @@ public class ItemModel implements Model {
     final public static String ITEM_SELECTED = "item_selected";
     final public static String NEW_SELECTION_STATUS = "set_the_selection_status_of_item";
     final public static String ITEM_DRAGGING = "item_dragging_event";
+    final public static String DRAGGING_FINISHED = "item_dragging_event_finished";
+
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
 
@@ -55,7 +57,7 @@ public class ItemModel implements Model {
         getAllTags();
         refreshTags();
 
-        isFavourite = Util.isFileFavourite(file);
+        isFavourite = DatabasesUtil.isFileFavourite(file);
         if (isFavourite){
             // TODO: bohhhhhh
             System.out.println(" ");
@@ -68,22 +70,22 @@ public class ItemModel implements Model {
     }
 
     private void getAllTags(){
-        tagsMap = Util.getTagsColorMap();
+        tagsMap = DatabasesUtil.getTagsColorMap();
     }
 
     public void setFavourite(boolean favourite){
         this.isFavourite = favourite;
         if(favourite){
-            Util.addFavourite("", file.getPath());
+            DatabasesUtil.addFavourite("", file.getPath());
         }else {
-            Util.removeFavourite(file.getPath());
+            DatabasesUtil.removeFavourite(file.getPath());
         }
     }
 
     public boolean isFavourite(){return isFavourite;}
 
     public void refreshTags(){
-        subTags = Util.getSubsTags(file);
+        subTags = DatabasesUtil.getSubsTags(file);
 
         propertyChangeSupport.firePropertyChange(ItemModel.REFRESH_TAGS, null, subTags);
     }
@@ -92,11 +94,11 @@ public class ItemModel implements Model {
 
 
     public void newTagSelected(String name){
-        Util.newFileTag(name, file.getPath());
+        DatabasesUtil.newFileTag(name, file.getPath());
     }
 
     public void removeTag(String name){
-        Util.removeTagFromFile(file.getPath(), name);
+        DatabasesUtil.removeTagFromFile(file.getPath(), name);
     }
 
     public void lastOpenedFolder(File item){
@@ -106,6 +108,10 @@ public class ItemModel implements Model {
 
     public void dragItem(Point mousePosition, Icon fileIcon){
         propertyChangeSupport.firePropertyChange(ItemModel.ITEM_DRAGGING, fileIcon, mousePosition);
+    }
+
+    public void dragFinish(Point mousePosition){
+        propertyChangeSupport.firePropertyChange(ItemModel.DRAGGING_FINISHED, null, mousePosition);
     }
 
     public void stopDrag(){

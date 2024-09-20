@@ -10,18 +10,14 @@ import org.example.SearchText;
 import org.example.TabPage;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.ArrayList;
 
 import org.example.Layout.WrapLayout;
-import org.example.Util;
+import org.example.DatabasesUtil;
 
 
 public class ExplorerView extends TabPage {
@@ -55,7 +51,7 @@ public class ExplorerView extends TabPage {
     public boolean isDraggingItem = false;
     private Point draggingIconPoint;
     private Icon icon;
-    private boolean isDraggingDir = false;
+    public boolean isDraggingDir = false;
 
     public ExplorerView() {
         super("File Explorer " + count);
@@ -269,7 +265,7 @@ public class ExplorerView extends TabPage {
         colorButton.setOpaque(false);
         colorButton.setPreferredSize(new Dimension(16,16));
         colorButton.addActionListener(e -> {
-            colorButton.setIcon(new CircleIcon(Util.generateNewColor()));
+            colorButton.setIcon(new CircleIcon(DatabasesUtil.generateNewColor()));
         });
         newTagField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, colorButton );
         newTagField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
@@ -278,7 +274,7 @@ public class ExplorerView extends TabPage {
         newTagField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                colorButton.setIcon(new CircleIcon(Util.generateNewColor()));
+                colorButton.setIcon(new CircleIcon(DatabasesUtil.generateNewColor()));
                 colorButton.setVisible(true);
             }
 
@@ -378,6 +374,7 @@ public class ExplorerView extends TabPage {
         tmp.setFocusable(false);
         tmp.putClientProperty("JButton.buttonType", "borderless");
         shortcutListBar.add(tmp, ExplorerView.SHORTUCT_ITEM_CONSTRAINS,1);
+        shortcutListBar.revalidate();
         return tmp;
     }
 

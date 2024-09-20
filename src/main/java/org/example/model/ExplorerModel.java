@@ -1,7 +1,7 @@
 package org.example.model;
 
 import org.example.MItem;
-import org.example.Util;
+import org.example.DatabasesUtil;
 
 import javax.swing.*;
 import javax.swing.event.SwingPropertyChangeSupport;
@@ -11,6 +11,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ExplorerModel implements Model {
 
@@ -52,6 +53,12 @@ public class ExplorerModel implements Model {
             draggingItems.add(e);
             if(!e.getFile().isDirectory()){fileInDraggedItems = true;}
         });
+    }
+
+    public ItemModel getDifferenceBetweenSelectedAndDraggingItems(){
+        List<ItemModel> s = selectedItems.stream().filter( element -> !draggingItems.contains(element)).collect(Collectors.toList());
+        if(!s.isEmpty()){return s.get(0);}
+        return null;
     }
 
     public boolean getDraggedType(){return fileInDraggedItems;}
@@ -98,16 +105,16 @@ public class ExplorerModel implements Model {
     }
 
     public boolean isTagDuplicated(String tagName){
-        return Util.getTagsMap().containsKey(tagName);
+        return DatabasesUtil.getTagsMap().containsKey(tagName);
     }
 
     // TODO: update listeners like MItem witch has to update popup menu
     public void newTag(String tagName, String tagColor){
-        Util.newTag(tagName, tagColor);
+        DatabasesUtil.newTag(tagName, tagColor);
     }
 
     public void deleteTag(String tagName){
-        Util.deleteTag(tagName);
+        DatabasesUtil.deleteTag(tagName);
         propertyChangeSupport.firePropertyChange(ExplorerModel.TAG_DELETED, null, tagName);
     }
 

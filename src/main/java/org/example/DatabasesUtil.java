@@ -6,9 +6,8 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.util.*;
 import java.util.List;
-import java.util.function.BiConsumer;
 
-public final class Util {
+public final class DatabasesUtil {
 
     private static List<File> shortcutFiles;
     private static List<File> favouriteFiles;

@@ -1,7 +1,7 @@
 package org.example.controller;
 
 import org.example.MItem;
-import org.example.Util;
+import org.example.DatabasesUtil;
 import org.example.Utilities.CloudPathFinder;
 import org.example.model.ItemModel;
 import org.example.ShortcutItem;
@@ -211,7 +211,7 @@ public class ExplorerController {
      */
     private void refreshTagsList(){
 
-        for (Map.Entry<String, String> elem : Util.getTagsColorMap().entrySet()){
+        for (Map.Entry<String, String> elem : DatabasesUtil.getTagsColorMap().entrySet()){
             newTag(elem.getKey(), elem.getValue());
         }
     }
@@ -271,7 +271,7 @@ public class ExplorerController {
         }else {
             selectedTags.remove(source.getText());
         }
-        showFilesList(Util.getFilesFromTags(selectedTags));
+        showFilesList(DatabasesUtil.getFilesFromTags(selectedTags), null);
     }
 
     /**
@@ -280,20 +280,27 @@ public class ExplorerController {
      * @param e the ActionEvent triggered by the favorites button
      */
     private void showFavourites(ActionEvent e){
-        showFilesList(Util.getFavouritesData());
+        showFilesList(DatabasesUtil.getFavouritesData(), "Favourite");
     }
 
     /**
      * Refreshes the list of shortcuts.
      */
     private void refreshShortcutList(){
-        Util.getShortcutData().forEach((elem) -> {
+        DatabasesUtil.getShortcutData().forEach((elem) -> {
             JButton tmp = view.addShortcutItem(elem);
-            if(elem.getName().equals("Favourite")){tmp.addActionListener(this::showFavourites);}
-            else {
-                tmp.addActionListener(this::handleLeftPanelClicks);
-            }
+            tmp.addActionListener(this::handleLeftPanelClicks);
         });
+    }
+
+    /**
+     * Adds a shortcut item to the view.
+     *
+     * @param f the file to add as a shortcut item
+     */
+    private void addShortcutItem(File f){
+        JButton tmp = view.addShortcutItem(f);
+        tmp.addActionListener(this::handleLeftPanelClicks);
     }
 
     /**
@@ -323,9 +330,12 @@ public class ExplorerController {
      */
     private void handleLeftPanelClicks(ActionEvent e){
         String path = e.getSource().toString();
-        if(path.equals("Favourite")){return;}
         File f = new File(path);
         if(f.equals(model.getOpenedFolder())){return;}
+        if(path.equals("Favourite")){
+            showFilesList(DatabasesUtil.getFavouritesData(), "Favourite");
+            return;
+        }
         if(isLoadingFolder){return;}
         showFolder(f);
     }
@@ -433,9 +443,9 @@ public class ExplorerController {
      *
      * @param files the list of files to show
      */
-    private void showFilesList(List<File> files){
+    private void showFilesList(List<File> files, String listName){
 
-        model.setOpenedFolder(null);
+        model.setOpenedFolder((listName != null) ? new File(listName) : null);
         view.fileView_p.removeAll();
         view.fileView_p.repaint();
         view.fileView_p.revalidate();
@@ -496,6 +506,54 @@ public class ExplorerController {
         item.getModel().addPropertyChangeListener(ItemModel.NEW_ITEM, this::newItem);
         item.getModel().addPropertyChangeListener(ItemModel.ITEM_SELECTED, this::newSelection);
         item.getModel().addPropertyChangeListener(ItemModel.ITEM_DRAGGING, this::handleItemDragging);
+        item.getModel().addPropertyChangeListener(ItemModel.DRAGGING_FINISHED, this::handleDraggingFinish);
+    }
+
+    /**
+     * Handles item dragging events.
+     *
+     * This method is triggered when an item is being dragged. It updates the view
+     * to reflect the dragging state, including painting the dragged item and checking
+     * for overlap with other items.
+     *
+     * @param e the PropertyChangeEvent containing the dragging information
+     */
+    private void handleDraggingFinish(PropertyChangeEvent e){
+        ItemModel res = model.getDifferenceBetweenSelectedAndDraggingItems();
+        Point mousePosition = (Point) e.getNewValue();
+        SwingUtilities.convertPointFromScreen(mousePosition ,view.getUI());
+        if(res != null){
+            // TODO: implements folder copy by using FileSystemUtil.folderCopyUsingNIOFilesClass
+            System.out.println("Coping: ");
+            model.getDraggingItems().forEach(eelem -> System.out.print(eelem.getFile() + ", "));
+            System.out.println("In: " + res.getFile());
+
+            refreshView();
+        }else if (rectOverlap(new Rectangle(view.shortcutListBar.getX(), view.shortcutListBar.getY(),
+                        view.shortcutListBar.getWidth(), view.shortcutListBar.getHeight()),
+                        new Rectangle(mousePosition.x, mousePosition.y, 1,1)) && view.isDraggingDir){
+            model.getDraggingItems().forEach(elem -> {
+                if(!DatabasesUtil.getShortcutData().contains(elem.getFile())) {
+                    DatabasesUtil.addShortcut(elem.getFile().getName(), elem.getFile().getPath());
+                    addShortcutItem(elem.getFile());
+                }
+            });
+        }
+
+        model.clearSelection();
+    }
+
+    /**
+     * Refreshes the view by reloading the contents of the currently opened folder.
+     *
+     * This method triggers an ActionEvent to simulate a click on the left panel,
+     * causing the view to refresh and display the contents of the currently opened folder.
+     */
+    public void refreshView(){
+        File f = model.getOpenedFolder();
+        ActionEvent e = new ActionEvent((Object) f, -1, "");
+        model.setOpenedFolder(null);
+        handleLeftPanelClicks(e);
     }
 
     /**

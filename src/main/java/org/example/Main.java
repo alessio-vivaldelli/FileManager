@@ -6,6 +6,8 @@ import org.example.model.MyTabbedPaneModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 import org.example.view.MyTabbedPaneView;
 
@@ -44,7 +46,13 @@ public class Main {
         UIManager.put("Tree.background", Color.TRANSLUCENT);
         UIManager.put( "TextComponent.arc", 30 );
 
-        Util.initDatabaseData();
+        DatabasesUtil.initDatabaseData();
+
+        try {
+            FileSystemUtil.folderCopyUsingNIOFilesClass(new File("C:\\Users\\aless\\Downloads\\test\\souce"), new File("C:\\Users\\aless\\Downloads\\test\\dest"));
+        } catch (IOException e) {
+            System.out.println("Error on copy");
+        }
 
         JFrame frame = new JFrame("File Explorer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

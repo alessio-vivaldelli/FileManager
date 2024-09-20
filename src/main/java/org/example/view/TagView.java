@@ -1,6 +1,6 @@
 package org.example.view;
 
-import org.example.Util;
+import org.example.DatabasesUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,15 +29,15 @@ public class TagView extends JPanel {
     public void setTags(List<String> tags){
         tagsColor = new ArrayList<>();
         tags.forEach((tag) -> {
-            tagsColor.add(Util.getColorFromTag(tag));
+            tagsColor.add(DatabasesUtil.getColorFromTag(tag));
         });
     }
     public void addTag(String tag){
-        tagsColor.add(Util.getColorFromTag(tag));
+        tagsColor.add(DatabasesUtil.getColorFromTag(tag));
     }
 
     public void removeTag(String tag){
-        tagsColor.remove(Util.getColorFromTag(tag));
+        tagsColor.remove(DatabasesUtil.getColorFromTag(tag));
     }
 
     private void initUI(){
