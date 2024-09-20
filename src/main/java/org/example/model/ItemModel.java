@@ -1,10 +1,8 @@
 package org.example.model;
 
-import org.example.MItem;
 import org.example.Util;
-import org.example.view.Item;
-import org.example.view.TagView;
 
+import javax.swing.*;
 import javax.swing.event.SwingPropertyChangeSupport;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
@@ -19,6 +17,7 @@ public class ItemModel implements Model {
     final public static String REFRESH_TAGS = "tag_list_refresh";
     final public static String ITEM_SELECTED = "item_selected";
     final public static String NEW_SELECTION_STATUS = "set_the_selection_status_of_item";
+    final public static String ITEM_DRAGGING = "item_dragging_event";
 
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
 
@@ -94,17 +93,23 @@ public class ItemModel implements Model {
 
     public void newTagSelected(String name){
         Util.newFileTag(name, file.getPath());
-//        refreshTags();
     }
 
     public void removeTag(String name){
         Util.removeTagFromFile(file.getPath(), name);
-//        refreshTags();
     }
 
     public void lastOpenedFolder(File item){
         lastOpenedFolder = item;
         propertyChangeSupport.firePropertyChange(ItemModel.NEW_ITEM, null, item);
+    }
+
+    public void dragItem(Point mousePosition, Icon fileIcon){
+        propertyChangeSupport.firePropertyChange(ItemModel.ITEM_DRAGGING, fileIcon, mousePosition);
+    }
+
+    public void stopDrag(){
+        propertyChangeSupport.firePropertyChange(ItemModel.ITEM_DRAGGING, null, null);
     }
 
     @Override

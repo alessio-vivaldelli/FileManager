@@ -25,6 +25,8 @@ public class ExplorerModel implements Model {
 
 
     private List<ItemModel> selectedItems;
+    private List<ItemModel> draggingItems;
+    private boolean fileInDraggedItems = false;
     private SwingPropertyChangeSupport propertyChangeSupport = new SwingPropertyChangeSupport(this);
     private File openedFolder;
 
@@ -32,11 +34,30 @@ public class ExplorerModel implements Model {
     public ExplorerModel(){
         openedFolder = null;
         selectedItems = new ArrayList<>();
+        draggingItems = new ArrayList<>();
     }
+
+
 
     public void initModel() {
 
     }
+
+    public List<ItemModel> getSelectedItems(){return selectedItems;}
+
+    public void setDraggingItems() {
+        draggingItems.clear();
+        fileInDraggedItems = false;
+        selectedItems.forEach(e -> {
+            draggingItems.add(e);
+            if(!e.getFile().isDirectory()){fileInDraggedItems = true;}
+        });
+    }
+
+    public boolean getDraggedType(){return fileInDraggedItems;}
+
+    public List<ItemModel> getDraggingItems(){
+        return draggingItems;}
 
     public void draggingSelectionRectangle(Rectangle selection){
         propertyChangeSupport.firePropertyChange(ExplorerModel.DRAGGING_SELECTION_ACTION, null, selection);

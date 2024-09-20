@@ -3,6 +3,7 @@ package org.example.view;
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 import org.example.Icons.CircleIcon;
+import org.example.Icons.ClosedFolderIcon;
 import org.example.Layout.MOverlayLayout;
 import org.example.MItem;
 import org.example.SearchText;
@@ -17,6 +18,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.ArrayList;
 
 import org.example.Layout.WrapLayout;
 import org.example.Util;
@@ -46,9 +48,14 @@ public class ExplorerView extends TabPage {
     public JPanel insideTagPanel;
     public JTextField newTagField;
     public JButton colorButton;
+    public JScrollPane fileView;
 
     private Rectangle draggingRectangle = null;
     private static final Color draggingRectangleColor = new Color(0,0.39f,0.56f, 0.3f);
+    public boolean isDraggingItem = false;
+    private Point draggingIconPoint;
+    private Icon icon;
+    private boolean isDraggingDir = false;
 
     public ExplorerView() {
         super("File Explorer " + count);
@@ -65,9 +72,31 @@ public class ExplorerView extends TabPage {
         fileView_p.repaint();
     }
 
-    private void initView() {
+    public void paintDraggedItem(Point mousePosition, Icon fileIcon, boolean isDir, boolean isMulti){
+        if(!isDraggingItem){
+            icon = (isMulti) ? new ClosedFolderIcon(Item.getIconSize()) : fileIcon;
+            isDraggingDir = isDir;
+        }
+        isDraggingItem = true;
+        draggingIconPoint = mousePosition;
+        panel.repaint();
 
-        panel = new JPanel();
+    }
+    public void stopPainDraggedItem(){
+        isDraggingItem = false;
+        panel.repaint();
+    }
+
+    private void initView() {
+        panel = new JPanel(){
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                if(isDraggingItem) {
+                    icon.paintIcon(panel, (Graphics2D) g, draggingIconPoint.x - (icon.getIconWidth()/2), draggingIconPoint.y - (icon.getIconHeight()/2));
+                }
+            }
+        };
         panel.setFocusable(true);
         panel.setLayout(new MOverlayLayout(panel));
 
@@ -121,7 +150,7 @@ public class ExplorerView extends TabPage {
         fileView_p.setFocusable(true);
 
 
-        JScrollPane fileView = new JScrollPane(fileView_p);
+        fileView = new JScrollPane(fileView_p);
         fileView.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         fileView.getVerticalScrollBar().setUnitIncrement(20);
         fileView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -133,27 +162,36 @@ public class ExplorerView extends TabPage {
         DefaultTreeModel model = new DefaultTreeModel(root);
         tree = new JTree(model);
         tree.setFocusable(false);
-//        tree.setCellRenderer(new FileSystemTreeRenderer());
         tree.setEditable(true);
 
         JScrollPane treePane = new JScrollPane(tree);
 
         JPanel leftPanel = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "[]", "[][][][]"));
 
-        shortcutListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0"));
+        shortcutListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0")){
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                if(isDraggingItem && isDraggingDir) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                    g2.setColor(new Color(1, 1, 1, 0.5f));
+                    g2.fillRoundRect(0, 0, this.getWidth(), this.getHeight(), 10, 10);
+                    g2.setColor(Color.BLACK);
+                    g2.setFont(new Font("Arial", Font.BOLD, 20));
+                    int width = g2.getFontMetrics(g2.getFont()).stringWidth("Add Shortcut");
+                    g2.drawString("Add Shortcut", this.getWidth() / 2 - width / 2, this.getHeight() / 2);
+                }
+            }
+        };
+
+
         JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
         JLabel shortcutTitle = new JLabel("Shortcut");
         shortcutTitle.setHorizontalAlignment(SwingConstants.CENTER);
         shortcutTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
         shortcutListBar.add(shortcutTitle, "growx,pad 0,gapbottom 5,gaptop 10");
-//        for (int i = 0; i < 5; i++) {
-//            JButton b = new JButton("Test");
-//            b.setIcon((Icon) UIManager.get("FileView.directoryIcon"));
-//            b.setHorizontalAlignment(JButton.LEFT);
-//            b.setFocusable(false);
-//            b.putClientProperty("JButton.buttonType", "borderless");
-//            shortcutListBar.add(b, "growx,pad 0");
-//        }
+
         newShortcut = new JButton("New Shortcut"){
             @Override
             public void paint(Graphics g) {
@@ -174,9 +212,8 @@ public class ExplorerView extends TabPage {
         newShortcut.putClientProperty("JButton.buttonType", "borderless");
 
         shortcutListBar.add(newShortcut, "growx,pad 0,gapbottom 10,gaptop 15,gapleft 20,gapright 20");
-//        shortcutListBar.add(sep, "growx,gaptop 50,gapleft 10,gapright 10");
 
-        leftPanel.add(shortcutListBar, "growx,gapleft 0, gapright 0");
+        leftPanel.add(shortcutListBar, "growx,gapleft 0, gapright 0, gaptop 10");
 
 
         tagsListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0"));
@@ -255,13 +292,12 @@ public class ExplorerView extends TabPage {
 
         tagsListBar.add(newTagField, "growx,pad 0,gapbottom 2,gaptop 15,gapleft 20,gapright 20");
 
-//        tagsListBar.add(newTagButton, "growx,pad 0,gapbottom 2,gaptop 15,gapleft 20,gapright 20");
 
         leftPanel.add(tagsListBar, "growx,gapleft 0, gapright 0");
 
         leftPanel.add(sep,"growx,gaptop 20,gapleft 10,gapright 10");
 
-        //TODO: removed treePane, on leftPane row constrain was [][][grow]
+        // uncomment to reintroduce Tree view
 //        leftPanel.add(treePane, "growx, growy, gaptop 20");
 
 
@@ -293,22 +329,9 @@ public class ExplorerView extends TabPage {
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(leftScrollPanel, BorderLayout.WEST);
         centerPanel.add(fileView, BorderLayout.CENTER);
-//        splitPane.setLeftComponent(leftScrollPanel);
-//        splitPane.setRightComponent(fileView);
-//        splitPane.setDividerLocation(0.3);
 
         files.setLayout(new BorderLayout());
         files.add(centerPanel, BorderLayout.CENTER);
-
-//        JButton searchText = new JButton(""){
-//
-//            @Override
-//            public void setText(String text) {
-//                super.setText(text);
-//
-//            }
-//        };
-
 
         searchText = new SearchText();
 

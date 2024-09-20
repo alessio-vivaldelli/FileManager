@@ -4,6 +4,7 @@ import org.example.Icons.StarIcon;
 import org.example.MItem;
 import org.example.model.ExplorerModel;
 import org.example.model.ItemModel;
+import org.example.view.ExplorerView;
 import org.example.view.Item;
 
 import javax.swing.*;
@@ -151,27 +152,36 @@ public class ItemController {
         worker.execute();
     }
 
+    public Item getItem(){return view;}
+
     public class MouseHandlerClass implements MouseMotionListener, MouseListener {
+        public boolean isDragging = false;
+        public Point startingPoint;
+
+        private boolean isOut = false;
+        private Icon fileIcon;
+
+        private final double draggingSensibility = 20;
+        private Point initDrag = null;
+        private double initDistance;
+
+        private double getDistange(Point a, Point b){return Point.distance(a.x, a.y, b.x, b.y);}
 
         @Override
         public void mouseClicked(MouseEvent e) {
+
             if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
                 if (view.file.isDirectory()){
                     model.lastOpenedFolder(view.file);
                 }
             }
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            // selection logic in mousePressed is efficient than mouseClick
             if(SwingUtilities.isLeftMouseButton(e)) {
                 model.itemSelected(e.isControlDown());
             }
         }
 
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mousePressed(MouseEvent e) {
 
         }
 
@@ -187,14 +197,42 @@ public class ItemController {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            System.out.println("Dragging detected");
+
+            if(initDrag == null){
+                initDrag = e.getPoint();
+            }else if(!isDragging){
+                initDistance += getDistange(initDrag, e.getPoint());
+                initDrag = e.getPoint();
+            }
+            if(initDistance >= draggingSensibility) {
+                if (!isDragging && !isOut) {
+                    startingPoint = e.getPoint();
+                    isDragging = true;
+                    fileIcon = view.getIcon();
+
+                    model.dragItem(e.getLocationOnScreen(), fileIcon);
+                } else if (!isOut) {
+                    model.dragItem(e.getLocationOnScreen(), fileIcon);
+                }
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if(isDragging){
+                isDragging = false;
+                model.stopDrag();
+
+                initDrag = null;
+                initDistance = 0;
+            }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
 
         }
-    }
 
+    }
 }
 

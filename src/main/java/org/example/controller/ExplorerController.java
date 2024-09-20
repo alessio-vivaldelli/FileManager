@@ -41,6 +41,9 @@ public class ExplorerController {
 
     private Rectangle draggingRectangle;
 
+    private boolean isDraggingDir = false;
+    private boolean isDraggingMulti = false;
+
     /**
      * Constructor for ExplorerController.
      * Initializes the view and model, and sets up the controller.
@@ -492,6 +495,59 @@ public class ExplorerController {
     private void addItemListener(MItem item){
         item.getModel().addPropertyChangeListener(ItemModel.NEW_ITEM, this::newItem);
         item.getModel().addPropertyChangeListener(ItemModel.ITEM_SELECTED, this::newSelection);
+        item.getModel().addPropertyChangeListener(ItemModel.ITEM_DRAGGING, this::handleItemDragging);
+    }
+
+    /**
+     * Handles item dragging events.
+     *
+     * This method is triggered when an item is being dragged. It updates the view
+     * to reflect the dragging state, including painting the dragged item and checking
+     * for overlap with other items.
+     *
+     * @param e the PropertyChangeEvent containing the dragging information
+     */
+    private void handleItemDragging(PropertyChangeEvent e){
+        if(e.getNewValue() == null){
+            view.stopPainDraggedItem();
+        }else {
+            if(!view.isDraggingItem) {
+                if(!model.getSelectedItems().contains((ItemModel) e.getSource())){model.clearSelection();}
+                model.setItemSelected(true, (ItemModel) e.getSource());
+                model.setDraggingItems();
+                isDraggingDir = !model.getDraggedType();
+                isDraggingMulti = model.getDraggingItems().size() >  1;
+            }
+            Point mousePosition = (Point) e.getNewValue();
+            SwingUtilities.convertPointFromScreen(mousePosition, view.getUI());
+            view.paintDraggedItem(mousePosition, (Icon) e.getOldValue(), isDraggingDir, isDraggingMulti);
+            Point test = SwingUtilities.convertPoint(view.getUI(), mousePosition, view.fileView_p);
+            checkOverlapInDragItem(new Rectangle(test.x, test.y, 1,1));
+        }
+    }
+    // can be used also for item draggin by putting rectangle to -> mouse.x, mouse.y, 1, 1
+    private void checkOverlapInDragItem(Rectangle selectionRect){
+        for (int i = 0; i < view.fileView_p.getComponentCount(); i++) {
+            MItem item = (MItem) view.fileView_p.getComponent(i);
+            Rectangle itemRec = new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight());
+            if(rectOverlap(selectionRect, itemRec)){
+                model.setItemSelected(true,(ItemModel) item.getModel());
+            }else if(!model.getDraggingItems().contains((ItemModel) item.getModel())){
+                model.setItemSelected(false, (ItemModel) item.getModel());
+            }
+        }
+    }
+    // can be used also for item draggin by putting rectangle to -> mouse.x, mouse.y, 1, 1
+    private void checkOverlapInDragSelection(Rectangle selectionRect){
+        for (int i = 0; i < view.fileView_p.getComponentCount(); i++) {
+            MItem item = (MItem) view.fileView_p.getComponent(i);
+            Rectangle itemRec = new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight());
+            if(rectOverlap(selectionRect, itemRec)){
+                model.setItemSelected(true,(ItemModel) item.getModel());
+            }else{
+                model.setItemSelected(false, (ItemModel) item.getModel());
+            }
+        }
     }
 
     /**
@@ -503,16 +559,6 @@ public class ExplorerController {
         boolean isControlDown = (boolean) e.getOldValue();
         ItemModel fileModel = (ItemModel) e.getNewValue();
         model.newSelection(fileModel, isControlDown);
-    }
-
-    private void checkOverlapInDragSelection(Rectangle selectionRect){
-        for (int i = 0; i < view.fileView_p.getComponentCount(); i++) {
-            MItem item = (MItem) view.fileView_p.getComponent(i);
-            Rectangle itemRec = new Rectangle(item.getX(), item.getY(), item.getWidth(), item.getHeight());
-            if(rectOverlap(selectionRect, itemRec)){
-                model.setItemSelected(true,(ItemModel) item.getModel());
-            }else {model.setItemSelected(false, (ItemModel) item.getModel());}
-        }
     }
 
     private static boolean rectOverlap(Rectangle z, Rectangle r){
@@ -570,13 +616,12 @@ public class ExplorerController {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-
+            model.clearSelection();
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
             view.fileView_p.requestFocusInWindow();
-            model.clearSelection();
         }
 
         @Override
@@ -603,7 +648,7 @@ public class ExplorerController {
 
         @Override
         public void focusLost(FocusEvent e) {
-            model.clearSelection();
+//            model.clearSelection();
         }
 
         @Override

@@ -27,6 +27,7 @@ public class Item extends JPanel {
     private JButton starButton;
     private JPopupMenu popupMenu;
     public JMenuItem newTagButton;
+    private JLabel label;
 
     public Item(File f) {
         super();
@@ -38,13 +39,15 @@ public class Item extends JPanel {
         initUI();
     }
 
+    public Icon getIcon(){return label.getIcon();}
+
     protected void initUI() {
         JLayeredPane lp = new JLayeredPane();
         lp.setBounds(0, 0, Item.getItemOuterPreferredSize().width, Item.getItemOuterPreferredSize().height);
 
         popupMenu = new JPopupMenu();
 
-        JLabel label = new JLabel();
+        label = new JLabel();
         final int labelIconSize = Item.getIconSize();
 
         label.setBounds((Item.getItemOuterPreferredSize().width -( (int)(Item.getItemPreferredSize().width*0.7)))/2, (Item.getItemOuterPreferredSize().height - Item.getItemPreferredSize().height)/2, Item.getItemPreferredSize().width, Item.getItemPreferredSize().height);
@@ -77,12 +80,16 @@ public class Item extends JPanel {
                             e.printStackTrace();
                         }
                     }
+
                 }.execute();
             }
             else {
                 label.setIcon(new FileIcon(labelIconSize, extension));
             }
-        }else {
+        } else if (i == 0) {
+            label.setIcon((file.isDirectory()) ? new ClosedFolderIcon(labelIconSize) : new FileIcon(labelIconSize, file.getName()));
+            label.setText(file.getName());
+        } else {
 //            label.setIcon(getCachedIcon(file, labelIconSize));
             label.setIcon(new ClosedFolderIcon(labelIconSize));
             label.setText(file.getName());
