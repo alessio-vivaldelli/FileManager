@@ -119,9 +119,10 @@ public class ExplorerView extends TabPage {
         center.setPreferredSize(new Dimension(100, 100));
         center.setLayout(new MigLayout("insets 0, wrap 1", "[grow]0", "[]0[grow]0"));
 
-        JPanel path = new JPanel();
-        path.setBackground(Color.YELLOW);
-        path.setPreferredSize(new Dimension(5, 60));
+        // TODO: search bar and utils
+        JPanel path = new JPanel(new MigLayout());
+        path.setOpaque(false);
+
 
         JPanel files = new JPanel();
         files.setBackground(Color.CYAN);
@@ -218,27 +219,27 @@ public class ExplorerView extends TabPage {
         tagsTitle.setHorizontalAlignment(SwingConstants.CENTER);
         tagsTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
         tagsListBar.add(tagsTitle, "growx,pad 0,gapbottom 5,gaptop 10");
-        tagsListBar.add(insideTagPanel, "growx,pad 0");
 
-
-        newTagButton = new JButton("New Tag"){
-            @Override
-            public void paint(Graphics g) {
-                super.paint(g);
-
-                Graphics2D g2d = (Graphics2D) g;
-                float[] dashingPattern1 = {4.5f, 4.5f};
-                Stroke stroke2 = new BasicStroke(1f, BasicStroke.CAP_BUTT,
-                        BasicStroke.JOIN_MITER, 1.0f, dashingPattern1, 2.0f);
-
-                g2d.setStroke(stroke2);
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.drawRoundRect(0,0, (int) (this.getWidth()*0.98f), (int) (this.getHeight()*0.98f), 20,20);
-            }
-        };
-        newTagButton.setFocusable(false);
-        newTagButton.putClientProperty("FlatLaf.styleClass", "medium");
-        newTagButton.putClientProperty("JButton.buttonType", "borderless");
+// newTagButton
+//        newTagButton = new JButton("New Tag"){
+//            @Override
+//            public void paint(Graphics g) {
+//                super.paint(g);
+//
+//                Graphics2D g2d = (Graphics2D) g;
+//                float[] dashingPattern1 = {4.5f, 4.5f};
+//                Stroke stroke2 = new BasicStroke(1f, BasicStroke.CAP_BUTT,
+//                        BasicStroke.JOIN_MITER, 1.0f, dashingPattern1, 2.0f);
+//
+//                g2d.setStroke(stroke2);
+//                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//                g2d.drawRoundRect(0,0, (int) (this.getWidth()*0.98f), (int) (this.getHeight()*0.98f), 20,20);
+//            }
+//        };
+//        newTagButton.setFocusable(false);
+//        newTagButton.putClientProperty("FlatLaf.styleClass", "medium");
+//        newTagButton.putClientProperty("JButton.buttonType", "borderless");
+//        tagsListBar.add(newTagButton, "growx,pad 0,gapbottom 10,gaptop 15,gapleft 20,gapright 20");
 
         newTagField = new JTextField(){
             @Override
@@ -270,7 +271,6 @@ public class ExplorerView extends TabPage {
         newTagField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, colorButton );
         newTagField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
         newTagField.putClientProperty("JTextField.placeholderText", "new tag");
-
         newTagField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -287,7 +287,7 @@ public class ExplorerView extends TabPage {
         });
 
         tagsListBar.add(newTagField, "growx,pad 0,gapbottom 2,gaptop 15,gapleft 20,gapright 20");
-
+        tagsListBar.add(insideTagPanel, "growx,pad 0");
 
         leftPanel.add(tagsListBar, "growx,gapleft 0, gapright 0");
 

@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import org.example.FileSystemUtil;
+import org.example.Layout.WrapLayout;
 import org.example.MItem;
 import org.example.DatabasesUtil;
 import org.example.Utilities.CloudPathFinder;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.formdev.flatlaf.extras.*;
 
@@ -346,10 +349,9 @@ public class ExplorerController {
      * @param filterText the text to filter items by
      * @return true if items are found, false otherwise
      */
-    private boolean filterItemsByText(String filterText){
+    private List<MItem> filterItemsByText(String filterText){
         List<MItem> res = itemList.stream().filter(item -> item.toString().toLowerCase().startsWith(filterText)).toList();
-        System.out.println(res);
-        return !res.isEmpty();
+        return res;
     }
 
     /**
@@ -523,10 +525,10 @@ public class ExplorerController {
         Point mousePosition = (Point) e.getNewValue();
         SwingUtilities.convertPointFromScreen(mousePosition ,view.getUI());
         if(res != null){
-            // TODO: implements folder copy by using FileSystemUtil.folderCopyUsingNIOFilesClass
             System.out.println("Coping: ");
             model.getDraggingItems().forEach(eelem -> System.out.print(eelem.getFile() + ", "));
             System.out.println("In: " + res.getFile());
+            FileSystemUtil.moveItems(model.getDraggingItems().stream().map(ItemModel::getFile).collect(Collectors.toList()), res.getFile());
 
             refreshView();
         }else if (rectOverlap(new Rectangle(view.shortcutListBar.getX(), view.shortcutListBar.getY(),
@@ -717,9 +719,20 @@ public class ExplorerController {
                 return;
             }
 
-            boolean res = filterItemsByText(view.searchText.getText().toLowerCase() + e.getKeyChar());
-            view.searchText.exist(res);
+            List<MItem> res = filterItemsByText(view.searchText.getText().toLowerCase() + e.getKeyChar());
+
+            view.searchText.exist(!res.isEmpty());
             view.searchText.addChar(e.getKeyChar());
+            if(res.isEmpty()){
+                return;
+            }
+            // Focus scroll bar to selected item
+            int heightScroll = ( (WrapLayout) view.fileView_p.getLayout())
+                    .getItemHeightFromIndex(Arrays.asList(view.fileView_p.getComponents()).indexOf(res.get(0)));
+
+            view.fileView.getVerticalScrollBar().setValue(heightScroll);
+            model.clearSelection();
+            model.setItemSelected(true,(ItemModel) res.get(0).getModel());
         }
 
         @Override

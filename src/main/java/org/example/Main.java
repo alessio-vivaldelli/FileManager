@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.example.view.MyTabbedPaneView;
 
@@ -48,11 +49,14 @@ public class Main {
 
         DatabasesUtil.initDatabaseData();
 
-        try {
-            FileSystemUtil.folderCopyUsingNIOFilesClass(new File("C:\\Users\\aless\\Downloads\\test\\souce"), new File("C:\\Users\\aless\\Downloads\\test\\dest"));
-        } catch (IOException e) {
-            System.out.println("Error on copy");
-        }
+//        try {
+//            FileSystemUtil.copyFolder(new File("C:\\Users\\aless\\Downloads\\test\\souce"), new File("C:\\Users\\aless\\Downloads\\test\\c"));
+//        } catch (IOException e) {
+//            System.out.println("Error on copy");
+//        }
+//        ArrayList<File> files = new ArrayList<>();
+//        files.add(new File("C:\\Users\\aless\\Downloads\\test\\souce")); files.add(new File("C:\\Users\\aless\\Downloads\\test\\itemTest.txt"));
+//        FileSystemUtil.copyItems(files, new File("C:\\Users\\aless\\Downloads\\test\\c"));
 
         JFrame frame = new JFrame("File Explorer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

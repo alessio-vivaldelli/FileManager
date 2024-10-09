@@ -4,26 +4,98 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 
 public class FileSystemUtil {
 
-    private static long fileCopyUsingNIOFilesClass(File fileToCopy, File newFile) throws IOException
-    {
-        Path source = Paths.get(fileToCopy.getPath());
-        Path destination = Paths.get(newFile.getPath());
-        long start = System.currentTimeMillis();
-
-        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-        long end = System.currentTimeMillis();
-
-        return (end-start);
+    public static void copyFolder(File folderSrc, File folderDest) throws IOException {
+        folderCopyUsingNIOFilesClass(folderSrc, folderDest);
     }
 
-    // TODO: handle when this function is called with file instead folder as source
-    public static void folderCopyUsingNIOFilesClass(File folderToCopy, File newDestination) throws IOException
+    public static boolean deleteItem(File item){
+        boolean deleteRes;
+        if(item.isDirectory()){
+            deleteRes = deleteFolder(item);
+        }else {
+            deleteRes = item.delete();
+        }
+        System.out.println("Result of deleting: " + deleteRes);
+        return deleteRes;
+    }
+
+    private static boolean deleteFolder(File folder) {
+    if (folder.isDirectory()) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                deleteFolder(file);
+            }
+        }
+    }
+    return folder.delete();
+}
+
+    public static void moveItems(List<File> items, File destination){
+        List<File> fileToDelete = new ArrayList<>();
+
+        for(File file : items){
+            if(file.isDirectory()) {
+                try {
+                    folderCopyUsingNIOFilesClass(file, destination);
+                    fileToDelete.add(file);
+                } catch (IOException e) {
+                    System.out.println("Error on coping: " + file);
+                    e.printStackTrace();
+                }
+            }else {
+                try {
+                    fileCopyUsingNIOFilesClass(file, destination);
+                    fileToDelete.add(file);
+                } catch (IOException e) {
+                    System.out.println("Error on item coping");
+                    e.printStackTrace();
+                }
+            }
+        }
+        for (File item : fileToDelete){
+            deleteItem(item);
+        }
+    }
+
+    // TODO: handle duplicated names in copy
+    public static void copyItems(ArrayList<File> items, File destination){
+
+        for(File file : items){
+            if(file.isDirectory()) {
+                try {
+                    folderCopyUsingNIOFilesClass(file, destination);
+                } catch (IOException e) {
+                    System.out.println("Error on coping: " + file);
+                    e.printStackTrace();
+                }
+            }else {
+                try {
+                    fileCopyUsingNIOFilesClass(file, destination);
+                } catch (IOException e) {
+                    System.out.println("Error on item coping");
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void fileCopyUsingNIOFilesClass(File fileSrc, File fileDest) throws IOException {
+        Path copied =  Paths.get(fileDest.getPath()).resolve(fileSrc.getName());
+        Path originalPath = Paths.get(fileSrc.getPath());
+        Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+
+    private static void folderCopyUsingNIOFilesClass(File folderToCopy, File newDestination) throws IOException
     {
         Path source = Paths.get(folderToCopy.getPath());
 
@@ -43,10 +115,12 @@ public class FileSystemUtil {
                     {
                         Path targetdir = target.resolve(source.relativize(dir));
                         try {
-                            Files.copy(dir, targetdir);
+                            // If the file/folder already exist, first delete old one then copy
+                            if((targetdir.toFile()).exists()){ deleteItem(targetdir.toFile()); }
+                            Files.copy(dir, targetdir, StandardCopyOption.REPLACE_EXISTING);
                         } catch (FileAlreadyExistsException e) {
                             if (!Files.isDirectory(targetdir))
-                                throw e;
+                                throw new IOException("Error on file");
                         }
                         return CONTINUE;
                     }

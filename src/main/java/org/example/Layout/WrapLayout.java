@@ -11,6 +11,7 @@ public class WrapLayout extends FlowLayout {
 
     private int compColons;
     private int compRows;
+    private int thisHeight;
     private Dimension maxDimensions = null;
 
     public WrapLayout(int align, int hgap, int vgap) {
@@ -27,6 +28,7 @@ public class WrapLayout extends FlowLayout {
         Container TMPthisContainer = target.getParent();
         if(target.getComponentCount() <= 0){return new Dimension(50, 0);}
         int thisWidth = thisContainer.getSize().width;
+        thisHeight = thisContainer.getSize().height;
         while (thisWidth <= 0){
             thisWidth = TMPthisContainer.getSize().width;
             TMPthisContainer = TMPthisContainer.getParent();
@@ -51,7 +53,7 @@ public class WrapLayout extends FlowLayout {
                 if(rowDim > maxRowDim){maxRowDim = rowDim;}
             }
             Dimension res = new Dimension(maxRowDim, compRows*(target.getComponent(0).getPreferredSize().height + getVgap()));
-
+//            System.out.println(res);
             this.setHgap(initialHGap);
             return res;
         }
@@ -75,4 +77,12 @@ public class WrapLayout extends FlowLayout {
         }
         return preferredLayoutSize(target);
     }
+
+
+    public int getItemHeightFromIndex(int index){
+        int row = (index / compColons);
+        return (row) * (getVgap() + Item.getItemOuterPreferredSize().height);
+    }
+
+    public int getRows(){return compRows;}
 }

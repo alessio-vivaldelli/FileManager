@@ -58,10 +58,6 @@ public class ItemModel implements Model {
         refreshTags();
 
         isFavourite = DatabasesUtil.isFileFavourite(file);
-        if (isFavourite){
-            // TODO: bohhhhhh
-            System.out.println(" ");
-        }
     }
 
     private void draggingSelectionDetected(PropertyChangeEvent e){
