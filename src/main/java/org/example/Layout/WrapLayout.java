@@ -4,6 +4,7 @@ import org.example.MItem;
 import org.example.view.Item;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class WrapLayout extends FlowLayout {
     private int initialHGap;
@@ -13,6 +14,7 @@ public class WrapLayout extends FlowLayout {
     private int compRows;
     private int thisHeight;
     private Dimension maxDimensions = null;
+    private int elements;
 
     public WrapLayout(int align, int hgap, int vgap) {
         super(align, hgap, vgap);
@@ -35,6 +37,7 @@ public class WrapLayout extends FlowLayout {
         }
 
         Dimension dim = target.getComponent(0).getPreferredSize();
+        elements = target.getComponentCount();
         compColons = 0;
         compRows = 0;
         if(!(target.getComponent(0).getClass().equals(MItem.class))){
@@ -52,8 +55,8 @@ public class WrapLayout extends FlowLayout {
                 }
                 if(rowDim > maxRowDim){maxRowDim = rowDim;}
             }
-            Dimension res = new Dimension(maxRowDim, compRows*(target.getComponent(0).getPreferredSize().height + getVgap()));
-//            System.out.println(res);
+            Dimension res = new Dimension(maxRowDim,
+                    compRows*(target.getComponent(0).getPreferredSize().height + getVgap()));
             this.setHgap(initialHGap);
             return res;
         }
@@ -67,7 +70,8 @@ public class WrapLayout extends FlowLayout {
         compColons = (thisWidth / (targetPrefSize + fillGap));
         compRows = (int) Math.ceil((double) target.getComponentCount() / compColons);
 
-        return new Dimension(compColons*(targetPrefSize + fillGap), compRows*(dim.height + getVgap()));
+        return new Dimension(compColons*(targetPrefSize + fillGap),
+                compRows*(dim.height + getVgap()));
     }
 
     @Override
@@ -85,4 +89,28 @@ public class WrapLayout extends FlowLayout {
     }
 
     public int getRows(){return compRows;}
+
+    public int getNewIndexBasedOnDirection(int oldIndex, int direction){
+        if(oldIndex < 0){return -1;}
+        int index = 0;
+
+        switch (direction){
+            case KeyEvent.VK_UP:
+                index = oldIndex - compColons;
+                break;
+            case KeyEvent.VK_DOWN:
+                index = oldIndex + compColons;
+                break;
+            case KeyEvent.VK_LEFT:
+                index = oldIndex - 1;
+                break;
+            case KeyEvent.VK_RIGHT:
+                index = oldIndex + 1;
+                break;
+        }
+        if(index < 0){
+            index = elements + index*-1;
+        }
+        return index % (Math.min(elements, compRows*compColons));
+    }
 }

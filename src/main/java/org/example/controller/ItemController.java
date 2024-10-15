@@ -9,12 +9,10 @@ import org.example.view.Item;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -171,8 +169,15 @@ public class ItemController {
         public void mouseClicked(MouseEvent e) {
 
             if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-                if (view.file.isDirectory()){
-                    model.lastOpenedFolder(view.file);
+                if (model.getFile().isDirectory()){
+                    model.lastOpenedFolder(model.getFile());
+                }else {
+                    try {
+                        Desktop.getDesktop().open(model.getFile());
+                    } catch (IOException ex) {
+                        System.out.println("Error on opening file:");
+                        ex.printStackTrace();
+                    }
                 }
             }
             if(SwingUtilities.isLeftMouseButton(e)) {
@@ -236,7 +241,6 @@ public class ItemController {
         public void mouseMoved(MouseEvent e) {
 
         }
-
     }
 }
 

@@ -27,7 +27,10 @@ public class SearchText extends JLabel {
             return;
         }
         putClientProperty("FlatLaf.style", "arc: 999; border: 2,10,2,10,#135b76");
+    }
 
+    public void reset(){
+        this.setText("");
     }
 
     @Override

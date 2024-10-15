@@ -18,6 +18,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +48,7 @@ public class ExplorerController {
 
     private boolean isDraggingDir = false;
     private boolean isDraggingMulti = false;
+    private List<MItem> textFilteredItems;
 
     /**
      * Constructor for ExplorerController.
@@ -69,6 +72,7 @@ public class ExplorerController {
      */
     private void initController() {
 
+        textFilteredItems = new ArrayList<>();
         draggingRectangle = null;
 
         leftShortcut = view.getShortcutTabs();
@@ -203,7 +207,6 @@ public class ExplorerController {
         if(model.isTagDuplicated(newTag)){return;}
         field.setText("");
         field.setFocusable(false); field.setFocusable(true);
-
 
         model.newTag(newTag, view.getNewTagColor());
         newTag(newTag, view.getNewTagColor());
@@ -350,7 +353,8 @@ public class ExplorerController {
      * @return true if items are found, false otherwise
      */
     private List<MItem> filterItemsByText(String filterText){
-        List<MItem> res = itemList.stream().filter(item -> item.toString().toLowerCase().startsWith(filterText)).toList();
+        List<MItem> res = itemList.stream()
+                .filter(item -> item.toString().toLowerCase().startsWith(filterText)).toList();
         return res;
     }
 
@@ -363,6 +367,7 @@ public class ExplorerController {
         showFolder((File) e.getNewValue());
     }
 
+
     /**
      * Handles the creation of a new shortcut tab.
      *
@@ -372,7 +377,8 @@ public class ExplorerController {
         ShortcutItem item = (ShortcutItem) e.getNewValue();
 
 
-        leftShortcut.addTab(item.name, new FlatSVGIcon( "icons/docs.svg", ExplorerView.ICON_SIZE, ExplorerView.ICON_SIZE ), item);
+        leftShortcut.addTab(item.name, new FlatSVGIcon( "icons/docs.svg",
+                ExplorerView.ICON_SIZE, ExplorerView.ICON_SIZE ), item);
     }
 
     /**
@@ -528,7 +534,8 @@ public class ExplorerController {
             System.out.println("Coping: ");
             model.getDraggingItems().forEach(eelem -> System.out.print(eelem.getFile() + ", "));
             System.out.println("In: " + res.getFile());
-            FileSystemUtil.moveItems(model.getDraggingItems().stream().map(ItemModel::getFile).collect(Collectors.toList()), res.getFile());
+            FileSystemUtil.moveItems(model.getDraggingItems().stream()
+                    .map(ItemModel::getFile).collect(Collectors.toList()), res.getFile());
 
             refreshView();
         }else if (rectOverlap(new Rectangle(view.shortcutListBar.getX(), view.shortcutListBar.getY(),
@@ -626,6 +633,31 @@ public class ExplorerController {
                 z.y < r.y + r.height && z.y + z.height > r.y;
     }
 
+    public void focusToSelectionIndex(int index){
+        if(index == -1){return;}
+        // Focus scroll bar to selected item
+        int heightScroll = ( (WrapLayout) view.fileView_p.getLayout()).getItemHeightFromIndex(index);
+        view.fileView.getVerticalScrollBar().setValue(heightScroll);
+    }
+
+    private int getIndexFromMItem(MItem item){
+        return Arrays.asList(view.fileView_p.getComponents()).indexOf(item);
+    }
+
+
+    private MItem getMItemFromSelectionIndex(int index){
+        if(model.getSelectedItems().isEmpty()){
+            return (MItem) view.fileView_p.getComponent(0);
+        }
+        for (int i = 0; i < view.fileView_p.getComponentCount(); i++){
+            MItem item = (MItem) view.fileView_p.getComponent(i);
+            if(((ItemModel) item.getModel()) == model.getSelectedItems().get(index)){
+                return item;
+            }
+        }
+        return null;
+    }
+
     /**
      * Inner class to handle mouse events.
      */
@@ -713,37 +745,88 @@ public class ExplorerController {
 
         @Override
         public void keyTyped(KeyEvent e) {
-            if((e.getKeyChar() < 'a' || e.getKeyChar() > 'z') &&
-                    (e.getKeyChar() < 'A' || e.getKeyChar() > 'Z') &&
-                    (e.getKeyChar() < '0' || e.getKeyChar() > '9')){
+            char keyChar = e.getKeyChar();
+
+            switch (keyChar){
+                case KeyEvent.VK_ENTER:
+                    ItemModel itemModel = model.getSelectedItems().get(0);
+                    if(itemModel != null) {
+                        if(itemModel.getFile().isDirectory()){
+                            showFolder(itemModel.getFile());
+                        }else {
+                            try {
+                                Desktop.getDesktop().open(itemModel.getFile());
+                            } catch (IOException ex) {
+                                System.out.println("Error on opening file:");
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                    model.clearSelection();
+                    return;
+                case KeyEvent.VK_BACK_SPACE:
+                    Path opened = model.getOpenedFolder().toPath();
+                    showFolder(opened.getParent().toFile());
+                    return;
+
+                case KeyEvent.VK_KP_DOWN:
+                    System.out.println("Down");
+                    return;
+
+                case KeyEvent.VK_SPACE:
+                    if(model.getSelectedItems().size() == 1 && textFilteredItems != null) {
+                        int index = textFilteredItems.indexOf(textFilteredItems.stream()
+                                .filter(elem -> ((ItemModel) elem.getModel()).getFile()
+                                        .equals(model.getSelectedItems().get(0).getFile())).toList().get(0));
+
+                        if(index == -1){return;}
+                        ItemModel newSelection = (ItemModel) textFilteredItems.get((index+1) % textFilteredItems.size())
+                                    .getModel();
+                        if(newSelection == null){return;}
+                        model.clearSelection();
+                        model.setItemSelected(true, newSelection);
+                        focusToSelectionIndex(
+                                getIndexFromMItem(textFilteredItems.get((index+1) % textFilteredItems.size())));
+                    }
+                    return;
+                case KeyEvent.VK_ESCAPE:
+                    view.searchText.reset();
+            }
+
+            if((keyChar < 'a' || keyChar > 'z') &&
+                    (keyChar < 'A' || keyChar > 'Z') &&
+                    (keyChar < '0' || keyChar > '9')){
                 return;
             }
 
-            List<MItem> res = filterItemsByText(view.searchText.getText().toLowerCase() + e.getKeyChar());
+            textFilteredItems = filterItemsByText(view.searchText.getText().toLowerCase() + keyChar);
 
-            view.searchText.exist(!res.isEmpty());
-            view.searchText.addChar(e.getKeyChar());
-            if(res.isEmpty()){
+            view.searchText.exist(!textFilteredItems.isEmpty());
+            view.searchText.addChar(keyChar);
+            if(textFilteredItems.isEmpty()){
                 return;
             }
-            // Focus scroll bar to selected item
-            int heightScroll = ( (WrapLayout) view.fileView_p.getLayout())
-                    .getItemHeightFromIndex(Arrays.asList(view.fileView_p.getComponents()).indexOf(res.get(0)));
 
-            view.fileView.getVerticalScrollBar().setValue(heightScroll);
+            focusToSelectionIndex(getIndexFromMItem(textFilteredItems.getFirst()));
             model.clearSelection();
-            model.setItemSelected(true,(ItemModel) res.get(0).getModel());
+            model.setItemSelected(true,(ItemModel) textFilteredItems.get(0).getModel());
         }
 
         @Override
         public void keyPressed(KeyEvent e) {
-
+            if(e.getKeyCode() >= 37 && e.getKeyCode() <= 40){
+                int oldIndex = getIndexFromMItem(getMItemFromSelectionIndex(0));
+                int newIndex = ((WrapLayout) view.fileView_p.getLayout()).
+                        getNewIndexBasedOnDirection(oldIndex, e.getKeyCode());
+                if(newIndex == -1){return;}
+                model.clearSelection();
+                model.setItemSelected(true,(ItemModel) ((MItem) view.fileView_p.getComponent(newIndex)).getModel());
+                focusToSelectionIndex(newIndex);
+            }
         }
 
         @Override
-        public void keyReleased(KeyEvent e) {
-
-        }
+        public void keyReleased(KeyEvent e) {}
     }
 
 

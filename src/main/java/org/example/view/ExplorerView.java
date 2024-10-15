@@ -89,7 +89,9 @@ public class ExplorerView extends TabPage {
             public void paint(Graphics g) {
                 super.paint(g);
                 if(isDraggingItem) {
-                    icon.paintIcon(panel, (Graphics2D) g, draggingIconPoint.x - (icon.getIconWidth()/2), draggingIconPoint.y - (icon.getIconHeight()/2));
+                    icon.paintIcon(panel,
+                            (Graphics2D) g, draggingIconPoint.x - (icon.getIconWidth()/2),
+                            draggingIconPoint.y - (icon.getIconHeight()/2));
                 }
             }
         };
@@ -117,8 +119,10 @@ public class ExplorerView extends TabPage {
         JPanel center = new JPanel();
         center.setBackground(Color.RED);
         center.setPreferredSize(new Dimension(100, 100));
-        center.setLayout(new MigLayout("insets 0, wrap 1", "[grow]0", "[]0[grow]0"));
+        center.setLayout(new MigLayout("insets 0, wrap 1",
+                "[grow]0", "[]0[grow]0"));
 
+        //
         // TODO: search bar and utils
         JPanel path = new JPanel(new MigLayout());
         path.setOpaque(false);
@@ -146,8 +150,13 @@ public class ExplorerView extends TabPage {
         };
         fileView_p.setFocusable(true);
 
-
         fileView = new JScrollPane(fileView_p);
+        InputMap im = fileView.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "none");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "none");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "none");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "none");
+
         fileView.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         fileView.getVerticalScrollBar().setUnitIncrement(20);
         fileView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -163,9 +172,11 @@ public class ExplorerView extends TabPage {
 
         JScrollPane treePane = new JScrollPane(tree);
 
-        JPanel leftPanel = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "[]", "[][][][]"));
+        JPanel leftPanel = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "[]",
+                "[][][][]"));
 
-        shortcutListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0")){
+        shortcutListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "",
+                "[fill]0")){
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
@@ -213,7 +224,8 @@ public class ExplorerView extends TabPage {
         leftPanel.add(shortcutListBar, "growx,gapleft 0, gapright 0, gaptop 10");
 
 
-        tagsListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0"));
+        tagsListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1",
+                "", "[fill]0"));
         JLabel tagsTitle = new JLabel("Tags");
         insideTagPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 0,0));
         tagsTitle.setHorizontalAlignment(SwingConstants.CENTER);
@@ -297,7 +309,8 @@ public class ExplorerView extends TabPage {
 //        leftPanel.add(treePane, "growx, growy, gaptop 20");
 
 
-        disksListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0"));
+        disksListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1",
+                "", "[fill]0"));
         JLabel disksTitle = new JLabel("Disks");
         disksTitle.setHorizontalAlignment(SwingConstants.CENTER);
         disksTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
@@ -305,7 +318,8 @@ public class ExplorerView extends TabPage {
 
         leftPanel.add(disksListBar, "growx,gapleft 0, gapright 0");
 
-        cloudListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1", "", "[fill]0"));
+        cloudListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1",
+                "", "[fill]0"));
         JLabel cloudTitle = new JLabel("Cloud");
         cloudTitle.setHorizontalAlignment(SwingConstants.CENTER);
         cloudTitle.putClientProperty( "FlatLaf.styleClass", "h3" );

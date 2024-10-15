@@ -56,7 +56,8 @@ public class ExplorerModel implements Model {
     }
 
     public ItemModel getDifferenceBetweenSelectedAndDraggingItems(){
-        List<ItemModel> s = selectedItems.stream().filter( element -> !draggingItems.contains(element)).collect(Collectors.toList());
+        List<ItemModel> s = selectedItems.stream().filter( element -> !draggingItems.contains(element))
+                .collect(Collectors.toList());
         if(!s.isEmpty()){return s.get(0);}
         return null;
     }
