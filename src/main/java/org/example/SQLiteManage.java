@@ -119,6 +119,25 @@ public class SQLiteManage {
         }
     }
 
+    public void removeFile(String filePath){
+        String insertSQL = "DELETE FROM %s WHERE FilePath = ?;".formatted(SQLiteManage.TAG_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setString(1, filePath);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on delete file path:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+        insertSQL = "DELETE from %s where  FolderPath = ?;".formatted(SQLiteManage.FAVOURITES_TABLE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            preparedStatement.setString(1, filePath);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            System.out.println("Error on delete file path:\n" + insertSQL);
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void removeFromFavouriteTable(String filePath, boolean isShortcut){
         String insertSQL = "DELETE FROM %s WHERE FolderPath = ? AND isShortcut = ?;".formatted(SQLiteManage.FAVOURITES_TABLE);
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {

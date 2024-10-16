@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 import org.example.Icons.CircleIcon;
 import org.example.Icons.ClosedFolderIcon;
+import org.example.Icons.GreaterIcon;
 import org.example.Layout.MOverlayLayout;
 import org.example.MItem;
 import org.example.SearchText;
@@ -46,6 +47,10 @@ public class ExplorerView extends TabPage {
     public JButton colorButton;
     public JScrollPane fileView;
 
+    private JButton navigationButtons;
+    private JPanel navigationSearch;
+    private JTextField navigationSearchField;
+
     private Rectangle draggingRectangle = null;
     private static final Color draggingRectangleColor = new Color(0,0.39f,0.56f, 0.3f);
     public boolean isDraggingItem = false;
@@ -81,6 +86,14 @@ public class ExplorerView extends TabPage {
     public void stopPainDraggedItem(){
         isDraggingItem = false;
         panel.repaint();
+    }
+
+    public JButton getNavigationButtons() {
+        return navigationButtons;
+    }
+
+    public JTextField getNavigationSearchField() {
+        return navigationSearchField;
     }
 
     private void initView() {
@@ -122,10 +135,58 @@ public class ExplorerView extends TabPage {
         center.setLayout(new MigLayout("insets 0, wrap 1",
                 "[grow]0", "[]0[grow]0"));
 
-        //
+
         // TODO: search bar and utils
-        JPanel path = new JPanel(new MigLayout());
-        path.setOpaque(false);
+        JPanel path = new JPanel(new MigLayout("insets 0",
+                "[grow]10[]0", "[grow]0"));
+        path.setPreferredSize(new Dimension(0, 70));
+        navigationButtons = new JButton(){
+            @Override
+            protected void paintBorder(Graphics g) {
+                super.paintBorder(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setColor(new Color(255,255,255,20));
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.drawRoundRect(0,0, this.getWidth()-1, this.getHeight()-1,this.getHeight()-1,this.getHeight()-1);
+            }
+        };
+        navigationButtons.putClientProperty("JButton.buttonType", "roundRect");
+        navigationButtons.putClientProperty("FlatLaf.style", "background: darken($Panel.background,1%)"); // hoverBackground: #fff
+        navigationButtons.setPreferredSize(new Dimension(0, 36));
+        navigationButtons.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+        navigationButtons.setOpaque(false);
+        navigationButtons.setFocusable(false);
+
+        path.add(navigationButtons, "growx,gapleft 10, gapbottom 10, gaptop 10");
+
+        navigationSearch = new JPanel() {
+            @Override
+            protected void paintBorder(Graphics g) {
+                super.paintBorder(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setColor(new Color(255,255,255,20));
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.drawRoundRect(0,0, this.getWidth()-1, this.getHeight()-1,this.getHeight()-1,this.getHeight()-1);
+            }};
+        navigationSearch.setPreferredSize(new Dimension(150, 36));
+        navigationSearch.setBackground(new Color(0,0,0,0));
+        navigationSearch.setLayout(new BorderLayout());
+        navigationSearch.setOpaque(false);
+        navigationSearch.setFocusable(false);
+
+        // https://docs.oracle.com/javase/tutorial/essential/io/find.html
+        navigationSearchField = new JTextField(){
+            @Override
+            protected void paintBorder(Graphics g) {}
+        };
+        navigationSearchField.setPreferredSize(new Dimension(0,36));
+        navigationSearchField.setBackground(new Color(0,0,0,0));
+        navigationSearchField.setHorizontalAlignment(SwingConstants.LEFT);
+        navigationSearchField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        navigationSearchField.putClientProperty("JTextField.placeholderText", "Search");
+        navigationSearch.add(navigationSearchField, BorderLayout.CENTER);
+
+        path.add(navigationSearch, "gapright 10, gapbottom 10, gaptop 10, align right");
 
 
         JPanel files = new JPanel();
@@ -219,10 +280,9 @@ public class ExplorerView extends TabPage {
         newShortcut.putClientProperty("FlatLaf.styleClass", "medium");
         newShortcut.putClientProperty("JButton.buttonType", "borderless");
 
-        shortcutListBar.add(newShortcut, "growx,pad 0,gapbottom 10,gaptop 15,gapleft 20,gapright 20");
+//        shortcutListBar.add(newShortcut, "growx,pad 0,gapbottom 10,gaptop 15,gapleft 20,gapright 20");
 
         leftPanel.add(shortcutListBar, "growx,gapleft 0, gapright 0, gaptop 10");
-
 
         tagsListBar = new JPanel(new MigLayout("insets 0, fillx, wrap 1",
                 "", "[fill]0"));
@@ -231,27 +291,6 @@ public class ExplorerView extends TabPage {
         tagsTitle.setHorizontalAlignment(SwingConstants.CENTER);
         tagsTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
         tagsListBar.add(tagsTitle, "growx,pad 0,gapbottom 5,gaptop 10");
-
-// newTagButton
-//        newTagButton = new JButton("New Tag"){
-//            @Override
-//            public void paint(Graphics g) {
-//                super.paint(g);
-//
-//                Graphics2D g2d = (Graphics2D) g;
-//                float[] dashingPattern1 = {4.5f, 4.5f};
-//                Stroke stroke2 = new BasicStroke(1f, BasicStroke.CAP_BUTT,
-//                        BasicStroke.JOIN_MITER, 1.0f, dashingPattern1, 2.0f);
-//
-//                g2d.setStroke(stroke2);
-//                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//                g2d.drawRoundRect(0,0, (int) (this.getWidth()*0.98f), (int) (this.getHeight()*0.98f), 20,20);
-//            }
-//        };
-//        newTagButton.setFocusable(false);
-//        newTagButton.putClientProperty("FlatLaf.styleClass", "medium");
-//        newTagButton.putClientProperty("JButton.buttonType", "borderless");
-//        tagsListBar.add(newTagButton, "growx,pad 0,gapbottom 10,gaptop 15,gapleft 20,gapright 20");
 
         newTagField = new JTextField(){
             @Override
@@ -455,5 +494,47 @@ public class ExplorerView extends TabPage {
     }
     public String getNewTagColor(){
         return ((CircleIcon) colorButton.getIcon()).getColor();
+    }
+
+    public JButton addPathButton(String pathElem, File folder){
+
+        JButton tmp = new JButton(pathElem){
+            @Override
+            public String toString() {
+                return folder.getPath();
+            }
+        };
+        navigationButtons.add(tmp, 0);
+        tmp.putClientProperty("FlatLaf.style", "background: darken($Panel.background,1%)"); // hoverBackground: #fff
+        tmp.setFocusable(false);
+        navigationButtons.revalidate();
+        navigationButtons.repaint();
+        if(navigationButtons.getComponentCount() > 1){
+            JButton icon = new JButton();
+            icon.setEnabled(false);
+            icon.putClientProperty("JButton.buttonType", "borderless");
+            icon.setIcon(new GreaterIcon(16));
+            navigationButtons.add(icon, 1);
+        }
+        return tmp;
+    }
+
+    public void checkNavigationDimension(){
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(navigationButtons);
+
+        if(navigationButtons.getWidth() >= topFrame.getWidth()*0.91f){
+            while (navigationButtons.getWidth() >= topFrame.getWidth()){
+                navigationButtons.remove(0);
+                navigationButtons.revalidate();
+                navigationButtons.repaint();
+            }
+            ((JButton) navigationButtons.getComponent(0)).setText("...");
+        }
+    }
+
+    public void clearPathButtons(){
+        navigationButtons.removeAll();
+        navigationButtons.repaint();
+        navigationButtons.revalidate();
     }
 }

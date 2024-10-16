@@ -14,6 +14,7 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -49,6 +50,8 @@ public class ExplorerController {
     private boolean isDraggingDir = false;
     private boolean isDraggingMulti = false;
     private List<MItem> textFilteredItems;
+
+    private JButton navigationButtons;
 
     /**
      * Constructor for ExplorerController.
@@ -157,6 +160,8 @@ public class ExplorerController {
 
             }
         });
+
+        navigationButtons = view.getNavigationButtons();
     }
 
     /**
@@ -402,6 +407,61 @@ public class ExplorerController {
         showFolder(f);
     }
 
+    private void setNavigationPathComponents(File folder){
+        File parent = folder;
+        String prt = (parent.getName().isEmpty()) ? parent.getPath() : parent.getName();
+        addNavigationPathButton(prt, parent);
+        System.out.println(parent.getName());
+        while(parent != null){
+            try {
+                parent = parent.getParentFile();
+                prt = (parent.getName().isEmpty()) ? parent.getPath() : parent.getName();
+                System.out.println(prt);
+                addNavigationPathButton(prt, parent);
+            } catch (Exception e) {
+                break;
+            }
+        }
+        view.checkNavigationDimension();
+    }
+
+    private void addNavigationPathButton(String name, File path){
+        JButton button = view.addPathButton(name, path);
+        if(button == null) {return;}
+        button.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(model.getOpenedFolder() != path) {
+                    showFolder(path);
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+    }
+
+    private void resetNavigationPathComponents(){
+        view.clearPathButtons();
+    }
+
     /**
      * Shows the contents of a folder.
      *
@@ -409,6 +469,9 @@ public class ExplorerController {
      */
     private void showFolder(File f){
         if(f == null){return;}
+        resetNavigationPathComponents();
+        setNavigationPathComponents(f);
+
         model.setOpenedFolder(f);
         view.fileView_p.removeAll();
         view.fileView_p.repaint();
@@ -452,6 +515,7 @@ public class ExplorerController {
      * @param files the list of files to show
      */
     private void showFilesList(List<File> files, String listName){
+        resetNavigationPathComponents();
 
         model.setOpenedFolder((listName != null) ? new File(listName) : null);
         view.fileView_p.removeAll();

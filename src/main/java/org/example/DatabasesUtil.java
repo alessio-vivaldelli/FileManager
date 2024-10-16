@@ -65,13 +65,17 @@ public final class DatabasesUtil {
     private static void loadTagsData(ResultSet rs){
         filesTagMap = new HashMap<>();
         tagIdPathMap = new HashMap<>();
+        List<String> toDelete = new ArrayList<>();
 
         try {
             while (rs.next()){
                 int id = rs.getInt("id");
                 int TagID = rs.getInt("TagID");
                 String FilePath = rs.getString("FilePath");
-
+                if(!(new File(FilePath)).exists()){
+                    toDelete.add(FilePath);
+                    continue;
+                }
                 if(filesTagMap.containsKey(FilePath)){
                     List<Integer> tmp = filesTagMap.get(FilePath);
                     tmp.add(TagID);
@@ -97,6 +101,9 @@ public final class DatabasesUtil {
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
+        for(String s : toDelete){
+            removeFileFromTables(s);
+        }
     }
 
     private static void loadFavouritesData(ResultSet rs){
@@ -110,6 +117,7 @@ public final class DatabasesUtil {
         };
         shortcutFiles.add(file);
         favouriteFiles = new ArrayList<>();
+        List<String> toDelete = new ArrayList<>();
 
         try {
             while (rs.next()){
@@ -117,7 +125,10 @@ public final class DatabasesUtil {
                 boolean isShortcut = rs.getBoolean("isShortcut");
 //                String DisplayName = rs.getString("DisplayName");
                 String FolderPath = rs.getString("FolderPath");
-
+                if(!(new File(FolderPath)).exists()){
+                    toDelete.add(FolderPath);
+                    continue;
+                }
                 if(isShortcut){
                     shortcutFiles.add(new File(FolderPath));
                 }else {
@@ -126,6 +137,9 @@ public final class DatabasesUtil {
             }
         }catch (Exception e){
             System.out.println(e.getMessage());
+        }
+        for(String s : toDelete){
+            removeFileFromTables(s);
         }
     }
 
@@ -166,6 +180,12 @@ public final class DatabasesUtil {
         SQLiteManage sql = new SQLiteManage();
         shortcutFiles.add(new File(filePath));
         sql.insertRowIntoFavourites(true, "", filePath);
+        sql.closeConnection();
+    }
+
+    private static void removeFileFromTables(String filePath){
+        SQLiteManage sql = new SQLiteManage();
+        sql.removeFile(filePath);
         sql.closeConnection();
     }
 
