@@ -1,4 +1,5 @@
 # FileManager
+Cross-platform file manager written in Java
 
 ## Overview
 This project is a Java-based application that provides a graphical user interface for viewing and managing files (file manager). The application uses Swing for the GUI and integrates with the FlatLaf look and feel for a modern appearance.
@@ -38,7 +39,7 @@ This project is a Java-based application that provides a graphical user interfac
 - Maven
 - SQLite drivers
 
-### Installation
+### Installation from source
 1. Clone the repository:
     ```sh
     git clone https://github.com/alessio-vivaldelli/FileManager
@@ -49,20 +50,28 @@ This project is a Java-based application that provides a graphical user interfac
     ```
 3. Build the project using Maven:
     ```sh
-    mvn clean install
+    mvn -B package --file pom.xml
     ```
 
-### Running the Application
+#### Running the Application
 1. Navigate to the `target` directory:
     ```sh
     cd target
     ```
 2. Run the application:
     ```sh
-    java -jar FileManager-1.0-SNAPSHOT.jar
+    java -jar FileManager-1.0-SNAPSHOT-jar-with-dependencies.jar
     ```
 
-
+## Running the Application from Release jar
+1. Navigate to the jar directory:
+    ```sh
+    cd <path-to-jar>
+    ```
+2. Run the application:
+    ```sh
+    java -jar FileManager-1.0-SNAPSHOT-jar-with-dependencies.jar
+    ```
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
