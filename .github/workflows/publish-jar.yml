@@ -23,7 +23,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Upload to Release
-        if: github.event_name == 'release'
         uses: JasonEtco/upload-to-release@master
         with:
           args: target/FileExplorer-1.0-SNAPSHOT-jar-with-dependencies.jar application/java-archive
