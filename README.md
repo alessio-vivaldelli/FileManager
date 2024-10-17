@@ -1,22 +1,41 @@
-# Item Viewer
+# FileManager
 
 ## Overview
-Item Viewer is a Java-based application that provides a graphical user interface (GUI) for viewing and managing files. The application uses Swing for the GUI and integrates with the FlatLaf look and feel for a modern appearance.
+This project is a Java-based application that provides a graphical user interface (GUI) for viewing and managing files. The application uses Swing for the GUI and integrates with the FlatLaf look and feel for a modern appearance.
 
 ## Features
+- File/Directory tags
+- Add files/dir to favourite
+- Drag and drop
+  - Move multiple files/dirs in another directory
+  - Add directory to shortcut 
+  - drag and drop selection
+- Glob pattern searching
+- Multi tabs
+- Clouds shortcut
 
+## TODOs
+- [ ] Contextual popup menu
+- [ ] Improving shortcut
+- [ ] Shortcut buttons for actions:
+  - open terminal
+  - vscode
+  - ...
+- [ ] Improving speed and background tasks
+- [ ] Create tests
+- [ ] 
 
 ## Technologies Used
 - Java
 - Swing
 - FlatLaf
+- SQLite
 - Maven
-
-## Getting Started
 
 ### Prerequisites
 - Java Development Kit (JDK) 8 or higher
 - Maven
+- SQLite drivers
 
 ### Installation
 1. Clone the repository:
@@ -25,7 +44,7 @@ Item Viewer is a Java-based application that provides a graphical user interface
     ```
 2. Navigate to the project directory:
     ```sh
-    cd item-viewer
+    cd FileManager
     ```
 3. Build the project using Maven:
     ```sh
@@ -39,14 +58,9 @@ Item Viewer is a Java-based application that provides a graphical user interface
     ```
 2. Run the application:
     ```sh
-    java -jar item-viewer-1.0-SNAPSHOT.jar
+    java -jar FileManager-1.0-SNAPSHOT.jar
     ```
 
-## Usage
-
-
-## Contributing
-Contributions are welcome! Please fork the repository and submit a pull request.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
