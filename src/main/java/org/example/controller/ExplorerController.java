@@ -411,12 +411,10 @@ public class ExplorerController {
         File parent = folder;
         String prt = (parent.getName().isEmpty()) ? parent.getPath() : parent.getName();
         addNavigationPathButton(prt, parent);
-        System.out.println(parent.getName());
         while(parent != null){
             try {
                 parent = parent.getParentFile();
                 prt = (parent.getName().isEmpty()) ? parent.getPath() : parent.getName();
-                System.out.println(prt);
                 addNavigationPathButton(prt, parent);
             } catch (Exception e) {
                 break;

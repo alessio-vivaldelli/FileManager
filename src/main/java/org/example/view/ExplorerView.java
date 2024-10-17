@@ -515,20 +515,26 @@ public class ExplorerView extends TabPage {
             icon.putClientProperty("JButton.buttonType", "borderless");
             icon.setIcon(new GreaterIcon(16));
             navigationButtons.add(icon, 1);
+            totalWidth += (int) icon.getPreferredSize().getWidth();
         }
+        totalWidth += (int) tmp.getPreferredSize().getWidth();
         return tmp;
     }
 
+    private int totalWidth = 0;
     public void checkNavigationDimension(){
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(navigationButtons);
-
-        if(navigationButtons.getWidth() >= topFrame.getWidth()*0.91f){
-            while (navigationButtons.getWidth() >= topFrame.getWidth()){
+        System.out.println("Width: " + totalWidth);
+        if(totalWidth >= topFrame.getWidth()*0.85f){
+            while (totalWidth >= topFrame.getWidth()*0.85f){
+                int tmpWidth = (int) navigationButtons.getComponent(0).getPreferredSize().getWidth();
                 navigationButtons.remove(0);
                 navigationButtons.revalidate();
                 navigationButtons.repaint();
+                totalWidth -= tmpWidth;
+                System.out.println("New width: " + totalWidth);
             }
-            ((JButton) navigationButtons.getComponent(0)).setText("...");
+//            ((JButton) navigationButtons.getComponent(0)).setText("...");
         }
     }
 
@@ -536,5 +542,6 @@ public class ExplorerView extends TabPage {
         navigationButtons.removeAll();
         navigationButtons.repaint();
         navigationButtons.revalidate();
+        totalWidth = 0;
     }
 }

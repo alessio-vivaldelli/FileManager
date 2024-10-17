@@ -19,15 +19,15 @@ public class CloudPathFinder {
 
         if((new File(oneDrivePath)).exists()){
             cloudsPath.add(oneDrivePath);
-            System.out.println("One drive Path: " + oneDrivePath);
+//            System.out.println("One drive Path: " + oneDrivePath);
         }
         if((new File(googleDrivePath)).exists()){
             cloudsPath.add(googleDrivePath);
-            System.out.println("Google Drive Path: " + googleDrivePath);
+//            System.out.println("Google Drive Path: " + googleDrivePath);
         }
         if((new File(dropboxPath)).exists()){
             cloudsPath.add(dropboxPath);
-            System.out.println("Drop Box Path: " + dropboxPath);
+//            System.out.println("Drop Box Path: " + dropboxPath);
         }
         return cloudsPath;
     }
