@@ -5,6 +5,7 @@ import org.example.Layout.WrapLayout;
 import org.example.MItem;
 import org.example.DatabasesUtil;
 import org.example.Utilities.CloudPathFinder;
+import org.example.Utilities.Finder;
 import org.example.model.ItemModel;
 import org.example.ShortcutItem;
 import org.example.model.ExplorerModel;
@@ -20,6 +21,7 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +54,7 @@ public class ExplorerController {
     private List<MItem> textFilteredItems;
 
     private JButton navigationButtons;
+    private JTextField navigationTextField;
 
     /**
      * Constructor for ExplorerController.
@@ -162,6 +165,35 @@ public class ExplorerController {
         });
 
         navigationButtons = view.getNavigationButtons();
+        navigationTextField = view.getNavigationSearchField();
+        navigationTextField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if(e.getKeyChar() == KeyEvent.VK_ENTER){
+                    if(navigationTextField.getText().isEmpty()){return;}
+                    Finder finder = new Finder(navigationTextField.getText());
+                    try {
+                        Files.walkFileTree(model.getOpenedFolder().toPath(), finder);
+                        finder.done();
+                        List<File> res = finder.getFinderFiles();
+                        showFilesList(res, null);
+
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
     }
 
     /**

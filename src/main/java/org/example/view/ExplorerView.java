@@ -522,9 +522,9 @@ public class ExplorerView extends TabPage {
     }
 
     private int totalWidth = 0;
+
     public void checkNavigationDimension(){
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(navigationButtons);
-        System.out.println("Width: " + totalWidth);
         if(totalWidth >= topFrame.getWidth()*0.85f){
             while (totalWidth >= topFrame.getWidth()*0.85f){
                 int tmpWidth = (int) navigationButtons.getComponent(0).getPreferredSize().getWidth();
@@ -532,9 +532,15 @@ public class ExplorerView extends TabPage {
                 navigationButtons.revalidate();
                 navigationButtons.repaint();
                 totalWidth -= tmpWidth;
-                System.out.println("New width: " + totalWidth);
             }
-//            ((JButton) navigationButtons.getComponent(0)).setText("...");
+            ((JButton) navigationButtons.getComponent(0)).setText("...");
+        }else if(navigationButtons.getComponentCount() > 0){
+            JButton tmp = ((JButton) navigationButtons.getComponent(0));
+            if(tmp.getText().equals("...")){
+                String txt = ((new File(tmp.toString())).getName().isEmpty()) ? (new File(tmp.toString())).getPath() :
+                        (new File(tmp.toString())).getName();
+                tmp.setText(txt);
+            }
         }
     }
 
