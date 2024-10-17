@@ -25,6 +25,6 @@ jobs:
       - name: Upload to Release
         uses: JasonEtco/upload-to-release@master
         with:
-          args: target/FileExplorer-1.0-SNAPSHOT-jar-with-dependencies.jar application/java-archive
+          args: target/FileExplorer-1.0-SNAPSHOT.jar application/java-archive
         env:
           GITHUB_TOKEN: ${{ secrets.JAVA_TOKEN }}
