@@ -1,7 +1,7 @@
 # FileManager
 
 ## Overview
-This project is a Java-based application that provides a graphical user interface (GUI) for viewing and managing files. The application uses Swing for the GUI and integrates with the FlatLaf look and feel for a modern appearance.
+This project is a Java-based application that provides a graphical user interface for viewing and managing files (file manager). The application uses Swing for the GUI and integrates with the FlatLaf look and feel for a modern appearance.
 ![FileManager](Screenshot/FileManager.png)
 
 ## Features
