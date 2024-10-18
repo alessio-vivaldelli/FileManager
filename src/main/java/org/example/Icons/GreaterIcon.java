@@ -15,7 +15,7 @@ public class GreaterIcon  extends FlatAbstractIcon {
     private int size;
 
     public GreaterIcon(int size){
-        super( size, size, UIManager.getColor( "Objects.Grey" ));
+        super( size, size, UIManager.getColor( "FileManager.accentColor" ));
         multFactor = size / 16.0;
         this.size = size;
     }

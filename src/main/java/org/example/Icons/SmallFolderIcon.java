@@ -1,42 +1,33 @@
 package org.example.Icons;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
-import javax.swing.UIManager;
-
 import com.formdev.flatlaf.icons.FlatAbstractIcon;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 
-/**
- * "directory" icon for {@link javax.swing.JFileChooser}.
- *
- * @uiDefault Objects.Grey						Color
- *
- * @author Karl Tauber
- */
-public class ClosedFolderIcon
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
+
+public class SmallFolderIcon
         extends FlatAbstractIcon
 {
     private Path2D path;
     private static double multFactor;
     private int size;
 
-    public ClosedFolderIcon(int size) {
-        super( 128, 128, UIManager.getColor( "FileManager.folderIconColor" ) );
+    public SmallFolderIcon(int size) {
+        super( size, size, UIManager.getColor( "FileManager.accentColor" ) );
         multFactor = size / 16.0;
         this.size = size;
     }
 
     @Override
-    protected void paintIcon( Component c, Graphics2D g ) {
+    protected void paintIcon(Component c, Graphics2D g ) {
         g.setRenderingHint( RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE );
-
         if( path == null )
             path = createFolderPath(size);
-        g.setStroke(new BasicStroke(4));
-        g.fill(path);
-//        g.draw( path );
+        g.setStroke(new BasicStroke(1));
+        g.draw(path);
     }
 
     static Path2D createFolderPath(int size) {
@@ -55,8 +46,9 @@ public class ClosedFolderIcon
                 8.5,4.5,
                 // top-right
                 14.5-arc,4.5,   FlatUIUtils.QUAD_TO, 14.5,4.5,  14.5,4.5+arc );
-        a.transform(AffineTransform.getScaleInstance(multFactor, multFactor));
-        a.transform(AffineTransform.getTranslateInstance(size/4,size/2 - 16));
+
+//        a.transform(AffineTransform.getScaleInstance(multFactor, multFactor));
+//        a.transform(AffineTransform.getTranslateInstance(size/4,size/2 - 16));
         return a;
     }
 }

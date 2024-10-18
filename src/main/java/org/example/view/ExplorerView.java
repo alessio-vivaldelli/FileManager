@@ -5,6 +5,7 @@ import net.miginfocom.swing.MigLayout;
 import org.example.Icons.CircleIcon;
 import org.example.Icons.ClosedFolderIcon;
 import org.example.Icons.GreaterIcon;
+import org.example.Icons.SmallFolderIcon;
 import org.example.Layout.MOverlayLayout;
 import org.example.MItem;
 import org.example.SearchText;
@@ -422,7 +423,7 @@ public class ExplorerView extends TabPage {
                 return file.getPath();
             }
         };
-        tmp.setIcon((Icon) UIManager.get("FileView.directoryIcon"));
+        tmp.setIcon(new SmallFolderIcon(16));
         tmp.setHorizontalAlignment(JButton.LEFT);
         tmp.setFocusable(false);
         tmp.putClientProperty("JButton.buttonType", "borderless");
@@ -466,7 +467,7 @@ public class ExplorerView extends TabPage {
                 return file.getPath();
             }
         };
-        tmp.setIcon((Icon) UIManager.get("FileView.directoryIcon"));
+        tmp.setIcon(new SmallFolderIcon(16));
         tmp.setHorizontalAlignment(JButton.LEFT);
         tmp.setFocusable(false);
         tmp.putClientProperty("JButton.buttonType", "borderless");
@@ -481,7 +482,7 @@ public class ExplorerView extends TabPage {
                 return file.getPath();
             }
         };
-        tmp.setIcon((Icon) UIManager.get("FileView.directoryIcon"));
+        tmp.setIcon(new SmallFolderIcon(16));
         tmp.setHorizontalAlignment(JButton.LEFT);
         tmp.setFocusable(false);
         tmp.putClientProperty("JButton.buttonType", "borderless");
@@ -550,4 +551,6 @@ public class ExplorerView extends TabPage {
         navigationButtons.revalidate();
         totalWidth = 0;
     }
+
+
 }

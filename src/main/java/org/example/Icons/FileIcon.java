@@ -26,7 +26,7 @@ public class FileIcon
     private String extension;
 
     public FileIcon(int size, String extension) {
-        super( 128, 128, UIManager.getColor( "Objects.Grey" ) );
+            super( 128, 128, UIManager.getColor( "FileManager.fileIconColor" ) );
         multFactor = size / 16.0;
         this.size = size;
         this.extension = extension;
