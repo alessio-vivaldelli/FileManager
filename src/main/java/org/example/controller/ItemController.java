@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import org.example.DatabasesUtil;
+import org.example.Icons.CircleIcon;
 import org.example.Icons.StarIcon;
 import org.example.MItem;
 import org.example.model.ExplorerModel;
@@ -71,6 +73,7 @@ public class ItemController {
         view.getPopupMenu().removeAll();
         model.tagsMap.forEach((key, value) -> {
             JCheckBoxMenuItem tmp = new JCheckBoxMenuItem(key);
+            tmp.setIcon(new CircleIcon(DatabasesUtil.getColorFromTag(key)));
             tmp.addActionListener(this::tagSelected);
             view.getPopupMenu().add(tmp,0);
         });

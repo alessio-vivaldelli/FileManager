@@ -74,7 +74,7 @@ public class Main {
 
         myTabbedPaneModel.addTab(TabPage.EXPLORER);
 
-        URL url = Main.class.getClassLoader().getResource("icon_white.png");
+        URL url = Main.class.getClassLoader().getResource("icona_2.png");
         if (url != null) {
             Toolkit kit = Toolkit.getDefaultToolkit();
             Image img = kit.createImage(url);
