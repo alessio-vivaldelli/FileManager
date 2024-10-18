@@ -1,5 +1,6 @@
 package org.example;
 
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import org.example.controller.MyTabbedPaneController;
 import org.example.model.MyTabbedPaneModel;
@@ -31,8 +32,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            FlatLaf.registerCustomDefaultsSource("themes");
             UIManager.setLookAndFeel(new FlatMacDarkLaf());
-//            UIManager.setLookAndFeel(new FlatMacLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
