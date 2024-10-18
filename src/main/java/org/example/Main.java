@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import org.example.view.MyTabbedPaneView;
@@ -37,6 +38,7 @@ public class Main {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+
 
         screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
         // Sey Style: https://www.formdev.com/flatlaf/components/tree/
@@ -72,6 +74,12 @@ public class Main {
 
         myTabbedPaneModel.addTab(TabPage.EXPLORER);
 
+        URL url = Main.class.getClassLoader().getResource("icon_white.png");
+        if (url != null) {
+            Toolkit kit = Toolkit.getDefaultToolkit();
+            Image img = kit.createImage(url);
+            frame.setIconImage(img);
+        }
         frame.setVisible(true);
     }
 }
