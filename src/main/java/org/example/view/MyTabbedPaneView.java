@@ -24,7 +24,7 @@ public class MyTabbedPaneView {
         trailing = new JToolBar();
         trailing.setFloatable( true );
 //        trailing.setBorder( null );
-        newTab = new JButton( new FlatSVGIcon( "icons/buildLoadChanges.svg" ) );
+        newTab = new JButton( new FlatSVGIcon( "icons/plus.svg" ) );
         trailing.add( newTab );
 
         popupMenu = new JPopupMenu();

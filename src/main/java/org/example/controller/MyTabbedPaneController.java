@@ -51,7 +51,9 @@ public class MyTabbedPaneController {
 
     protected void newTabPressed(ActionEvent e)
     {
-        popupMenu.show(newTab, newTab.getWidth() / 2, newTab.getHeight() / 2);;
+        System.out.println("Add Explorer Tab");
+        model.addTab(TabPage.EXPLORER);
+//        popupMenu.show(newTab, newTab.getWidth() / 2, newTab.getHeight() / 2);;
     }
 
     protected void addTab(PropertyChangeEvent l){

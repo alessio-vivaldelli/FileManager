@@ -30,6 +30,7 @@ import org.example.view.MyTabbedPaneView;
 public class Main {
 
     public static Dimension screenDimension;
+    private static final Dimension initDimension = new Dimension(1000,600);
 
     public static void main(String[] args) {
         try {
@@ -52,18 +53,10 @@ public class Main {
 
         DatabasesUtil.initDatabaseData();
 
-//        try {
-//            FileSystemUtil.copyFolder(new File("C:\\Users\\aless\\Downloads\\test\\souce"), new File("C:\\Users\\aless\\Downloads\\test\\c"));
-//        } catch (IOException e) {
-//            System.out.println("Error on copy");
-//        }
-//        ArrayList<File> files = new ArrayList<>();
-//        files.add(new File("C:\\Users\\aless\\Downloads\\test\\souce")); files.add(new File("C:\\Users\\aless\\Downloads\\test\\itemTest.txt"));
-//        FileSystemUtil.copyItems(files, new File("C:\\Users\\aless\\Downloads\\test\\c"));
 
-        JFrame frame = new JFrame("File Explorer");
+        JFrame frame = new JFrame("");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 500);
+        frame.setSize(initDimension);
         frame.setLayout(new BorderLayout());
 
         MyTabbedPaneView myTabbedPaneView = new MyTabbedPaneView();
@@ -81,5 +74,6 @@ public class Main {
             frame.setIconImage(img);
         }
         frame.setVisible(true);
+        frame.setLocation(150, 50);
     }
 }
