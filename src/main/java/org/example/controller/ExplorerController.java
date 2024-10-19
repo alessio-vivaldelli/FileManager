@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -54,7 +53,10 @@ public class ExplorerController {
     private List<MItem> textFilteredItems;
 
     private JButton navigationButtons;
-    private JTextField navigationTextField;
+    private JTextField navigationSearchField;
+    private JTextField navigationPathField;
+    private boolean isPathTextMode = false;
+    private MouseListener mouseListener;
 
     /**
      * Constructor for ExplorerController.
@@ -164,19 +166,85 @@ public class ExplorerController {
             }
         });
 
+        navigationPathField = view.getNavigationPathTextField();
         navigationButtons = view.getNavigationButtons();
-        navigationTextField = view.getNavigationSearchField();
-        navigationTextField.addKeyListener(new KeyListener() {
+        navigationSearchField = view.getNavigationSearchField();
+
+        navigationButtons.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                toggleNavigationBarMode();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
+        navigationPathField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if(e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    File fileText = (new File(navigationPathField.getText()));
+                    if(fileText.exists() && fileText.isDirectory()){
+                        navigationPathField.setFocusable(false);
+                        navigationPathField.setFocusable(true);
+                        showFolder(fileText);
+                    }
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+        navigationPathField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                toggleNavigationBarMode();
+            }
+        });
+
+        navigationSearchField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 if(e.getKeyChar() == KeyEvent.VK_ENTER){
-                    if(navigationTextField.getText().isEmpty()){return;}
-                    Finder finder = new Finder(navigationTextField.getText());
+                    if(navigationSearchField.getText().isEmpty()){return;}
+                    Finder finder = new Finder(navigationSearchField.getText());
                     try {
                         Files.walkFileTree(model.getOpenedFolder().toPath(), finder);
                         finder.done();
                         List<File> res = finder.getFinderFiles();
                         showFilesList(res, null);
+                        navigationSearchField.setText("");
+                        navigationSearchField.setFocusable(false);
+                        navigationSearchField.setFocusable(true);
 
                     } catch (IOException ex) {
                         ex.printStackTrace();
@@ -194,6 +262,25 @@ public class ExplorerController {
 
             }
         });
+    }
+
+    private void toggleNavigationBarMode(){
+        isPathTextMode = !isPathTextMode;
+        if(isPathTextMode){
+            navigationButtons.removeAll();
+            navigationButtons.setLayout(new BorderLayout());
+            navigationButtons.add(navigationPathField, BorderLayout.CENTER);
+            navigationPathField.requestFocus(true);
+            navigationButtons.revalidate(); navigationButtons.repaint();
+            mouseListener = navigationButtons.getMouseListeners()[0];
+        }else{
+            navigationButtons.removeAll();
+            navigationButtons.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
+            navigationButtons.revalidate(); navigationButtons.repaint();
+            navigationButtons.addMouseListener(mouseListener);
+            resetNavigationPathComponents();
+            setNavigationPathComponents(model.getOpenedFolder());
+        }
     }
 
     /**
@@ -440,6 +527,7 @@ public class ExplorerController {
     }
 
     private void setNavigationPathComponents(File folder){
+        navigationPathField.setText(folder.getPath());
         File parent = folder;
         String prt = (parent.getName().isEmpty()) ? parent.getPath() : parent.getName();
         addNavigationPathButton(prt, parent);

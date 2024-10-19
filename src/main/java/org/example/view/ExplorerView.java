@@ -13,6 +13,7 @@ import org.example.TabPage;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -29,6 +30,7 @@ public class ExplorerView extends TabPage {
     public static final String TAG_ITEM_CONSTRAINS = "growx,pad 0,gapbottom 2,gaptop 2";
 
     private static int count = 1;
+    public static final int navigationHigh = 55;
 
     JSplitPane splitPane;
     JTabbedPane shortcutTabs;
@@ -51,6 +53,7 @@ public class ExplorerView extends TabPage {
     private JButton navigationButtons;
     private JPanel navigationSearch;
     private JTextField navigationSearchField;
+    private JTextField navigationPathTextField;
 
     private Rectangle draggingRectangle = null;
     private static final Color draggingRectangleColor = new Color(0,0.39f,0.56f, 0.3f);
@@ -97,6 +100,10 @@ public class ExplorerView extends TabPage {
         return navigationSearchField;
     }
 
+    public JPanel getNavigationSearch() {
+        return navigationSearch;
+    }
+
     private void initView() {
         panel = new JPanel(){
             @Override
@@ -137,10 +144,9 @@ public class ExplorerView extends TabPage {
                 "[grow]0", "[]0[grow]0"));
 
 
-        // TODO: search bar and utils
         JPanel path = new JPanel(new MigLayout("insets 0",
-                "[grow]10[]0", "[grow]0"));
-        path.setPreferredSize(new Dimension(0, 70));
+                "[grow]10[]0", "[]0"));
+        path.setPreferredSize(new Dimension(0, navigationHigh));
         navigationButtons = new JButton(){
             @Override
             protected void paintBorder(Graphics g) {
@@ -153,13 +159,16 @@ public class ExplorerView extends TabPage {
         };
         navigationButtons.putClientProperty("JButton.buttonType", "roundRect");
         navigationButtons.putClientProperty("FlatLaf.style", "background: darken($Panel.background,1%)"); // hoverBackground: #fff
-        navigationButtons.setPreferredSize(new Dimension(0, 36));
+        navigationButtons.setPreferredSize(new Dimension(0, navigationHigh));
         navigationButtons.setLayout(new FlowLayout(FlowLayout.LEFT,0,0));
         navigationButtons.setOpaque(false);
+        navigationButtons.setBackground(new Color(0,0,0,0));
         navigationButtons.setFocusable(false);
 
-        path.add(navigationButtons, "growx,gapleft 10, gapbottom 10, gaptop 10");
 
+
+        path.add(navigationButtons, "growx,gapleft 10, gapbottom 10, gaptop 10");
+        
         navigationSearch = new JPanel() {
             @Override
             protected void paintBorder(Graphics g) {
@@ -169,7 +178,7 @@ public class ExplorerView extends TabPage {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.drawRoundRect(0,0, this.getWidth()-1, this.getHeight()-1,this.getHeight()-1,this.getHeight()-1);
             }};
-        navigationSearch.setPreferredSize(new Dimension(150, 36));
+        navigationSearch.setPreferredSize(new Dimension(150, navigationHigh));
         navigationSearch.setBackground(new Color(0,0,0,0));
         navigationSearch.setLayout(new BorderLayout());
         navigationSearch.setOpaque(false);
@@ -180,15 +189,25 @@ public class ExplorerView extends TabPage {
             @Override
             protected void paintBorder(Graphics g) {}
         };
-        navigationSearchField.setPreferredSize(new Dimension(0,36));
+        navigationSearchField.setPreferredSize(new Dimension(0,navigationHigh));
         navigationSearchField.setBackground(new Color(0,0,0,0));
         navigationSearchField.setHorizontalAlignment(SwingConstants.LEFT);
         navigationSearchField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         navigationSearchField.putClientProperty("JTextField.placeholderText", "Search");
         navigationSearch.add(navigationSearchField, BorderLayout.CENTER);
 
-        path.add(navigationSearch, "gapright 10, gapbottom 10, gaptop 10, align right");
+        navigationPathTextField = new JTextField(){
+            @Override
+            protected void paintBorder(Graphics g) {}
+        };
+        navigationPathTextField.setPreferredSize(new Dimension(0,navigationHigh));
+        navigationPathTextField.putClientProperty("FlatLaf.styleClass", "h4");
+        navigationPathTextField.setBackground(new Color(0,0,0,0));
+        navigationPathTextField.setBorder(new LineBorder(Color.RED));
+        navigationPathTextField.setHorizontalAlignment(SwingConstants.LEFT);
+        navigationPathTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
 
+        path.add(navigationSearch, "gapright 10, gapbottom 10, gaptop 10, align right");
 
         JPanel files = new JPanel();
         files.setBackground(Color.CYAN);
@@ -259,7 +278,7 @@ public class ExplorerView extends TabPage {
         JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
         JLabel shortcutTitle = new JLabel("Shortcut");
         shortcutTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        shortcutTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
+        shortcutTitle.putClientProperty( "FlatLaf.styleClass", "h2" );
         shortcutListBar.add(shortcutTitle, "growx,pad 0,gapbottom 5,gaptop 10");
 
         newShortcut = new JButton("New Shortcut"){
@@ -290,7 +309,7 @@ public class ExplorerView extends TabPage {
         JLabel tagsTitle = new JLabel("Tags");
         insideTagPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 0,0));
         tagsTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        tagsTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
+        tagsTitle.putClientProperty( "FlatLaf.styleClass", "h2" );
         tagsListBar.add(tagsTitle, "growx,pad 0,gapbottom 5,gaptop 10");
 
         newTagField = new JTextField(){
@@ -353,7 +372,7 @@ public class ExplorerView extends TabPage {
                 "", "[fill]0"));
         JLabel disksTitle = new JLabel("Disks");
         disksTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        disksTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
+        disksTitle.putClientProperty( "FlatLaf.styleClass", "h2" );
         disksListBar.add(disksTitle, "growx,pad 0,gapbottom 5,gaptop 10");
 
         leftPanel.add(disksListBar, "growx,gapleft 0, gapright 0");
@@ -362,7 +381,7 @@ public class ExplorerView extends TabPage {
                 "", "[fill]0"));
         JLabel cloudTitle = new JLabel("Cloud");
         cloudTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        cloudTitle.putClientProperty( "FlatLaf.styleClass", "h3" );
+        cloudTitle.putClientProperty( "FlatLaf.styleClass", "h2" );
         cloudListBar.add(cloudTitle, "growx,pad 0,gapbottom 5,gaptop 10");
 
         leftPanel.add(cloudListBar, "growx,gapleft 0, gapright 0");
@@ -427,6 +446,7 @@ public class ExplorerView extends TabPage {
         tmp.setHorizontalAlignment(JButton.LEFT);
         tmp.setFocusable(false);
         tmp.putClientProperty("JButton.buttonType", "borderless");
+//        tmp.putClientProperty("FlatLaf.styleClass", "large");
         shortcutListBar.add(tmp, ExplorerView.SHORTUCT_ITEM_CONSTRAINS,1);
         shortcutListBar.revalidate();
         return tmp;
@@ -497,6 +517,10 @@ public class ExplorerView extends TabPage {
         return ((CircleIcon) colorButton.getIcon()).getColor();
     }
 
+    public JTextField getNavigationPathTextField() {
+        return navigationPathTextField;
+    }
+
     public JButton addPathButton(String pathElem, File folder){
 
         JButton tmp = new JButton(pathElem){
@@ -506,7 +530,8 @@ public class ExplorerView extends TabPage {
             }
         };
         navigationButtons.add(tmp, 0);
-        tmp.putClientProperty("FlatLaf.style", "background: darken($Panel.background,1%)"); // hoverBackground: #fff
+        tmp.putClientProperty("FlatLaf.style", "background: #00000000; hoverBackground: darken($Panel.background,1%)"); // hoverBackground: #fff
+        tmp.putClientProperty("FlatLaf.styleClass", "h4");
         tmp.setFocusable(false);
         navigationButtons.revalidate();
         navigationButtons.repaint();
