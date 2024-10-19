@@ -1,3 +1,13 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/alessio-vivaldelli/FileManager/master/src/main/resources/icona_2.png" width="20%" alt="File Manager">
+</p>
+<p align="center">
+    <h1 align="center">File Manager</h1>
+<p align="center">
+    <em><code>A modern looks cross-platform file manager made in Java</code></em>
+</p>
+<br>
+
 # FileManager
 Cross-platform file manager written in Java
 
