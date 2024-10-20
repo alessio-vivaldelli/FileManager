@@ -13,7 +13,7 @@ Cross-platform file manager written in Java
 
 ## Overview
 This project is a Java-based application that provides a graphical user interface for viewing and managing files (file manager). The application uses Swing for the GUI and integrates with the FlatLaf look and feel for a modern appearance.
-![FileManager](Screenshot/FileManager.png)
+![FileManager](Screenshot/new-theme.png)
 
 ## Features
 - File/Directory tags
@@ -35,17 +35,16 @@ This project is a Java-based application that provides a graphical user interfac
   - ...
 - [ ] Improving speed and background tasks
 - [ ] Create tests
-- [ ] 
 
 ## Technologies Used
-- Java
+- Java 20
 - Swing
 - FlatLaf
 - SQLite
 - Maven
 
 ### Prerequisites
-- Java Development Kit (JDK) 8 or higher
+- Java 20 or higher
 - Maven
 - SQLite drivers
 

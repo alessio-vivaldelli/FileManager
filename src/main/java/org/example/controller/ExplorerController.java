@@ -989,7 +989,7 @@ public class ExplorerController {
                 return;
             }
 
-            focusToSelectionIndex(getIndexFromMItem(textFilteredItems.getFirst()));
+            focusToSelectionIndex(getIndexFromMItem(textFilteredItems.get(0)));
             model.clearSelection();
             model.setItemSelected(true,(ItemModel) textFilteredItems.get(0).getModel());
         }
