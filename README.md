@@ -81,9 +81,6 @@ This project is a Java-based application that provides a graphical user interfac
     ```sh
     java -jar FileManager-1.0-SNAPSHOT-jar-with-dependencies.jar
     ```
-## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
 ## Acknowledgements
 - [FlatLaf](https://www.formdev.com/flatlaf/)
 - [MigLayout](http://www.miglayout.com/)
